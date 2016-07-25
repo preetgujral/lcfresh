@@ -79,7 +79,7 @@ class BWGViewGalleries_bwg {
         ?>
         </select>
         <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-apply" type="button" title="<?php echo __("Apply","bwg_back"); ?>" onclick="if (!bwg_bulk_actions('.bulk_action', 'gallery_page')) {return false;}" value="<?php echo __("Apply","bwg_back"); ?>" />
-      <?php WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'galleries_form', $per_page,''); ?>
+      <?php WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'galleries_form', $per_page); ?>
       </div>
       <table class="wp-list-table widefat fixed pages">
         <thead>
@@ -200,7 +200,7 @@ class BWGViewGalleries_bwg {
       </table>
       <div class="tablenav bottom">
         <?php
-        WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'galleries_form', $per_page,'');		
+        WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'galleries_form', $per_page);		
         ?>
       </div>
       <input id="task" name="task" type="hidden" value="" />

@@ -65,7 +65,7 @@ class BWGViewTags_bwg {
       <div class="tablenav top">
         <?php
         WDWLibrary::search(__("Name", 'bwg_back'), $search_value, 'tags_form', 'position_search');
-        WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'tags_form', $per_page,'position_pag');
+        WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'tags_form', $per_page);
         ?>
       </div>
       <table class="wp-list-table widefat fixed pages">
@@ -173,7 +173,7 @@ class BWGViewTags_bwg {
       </table>
       <div class="tablenav bottom">
         <?php
-        WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'tags_form', $per_page,'');
+        WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'tags_form', $per_page);
         ?>
       </div>
       <input id="task" name="task" type="hidden" value="" />

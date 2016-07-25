@@ -238,7 +238,7 @@ class WDWLibrary {
     <?php
   }
   
-  public static function html_page_nav($count_items, $pager, $page_number, $form_id, $items_per_page = 20, $position_pag) {
+  public static function html_page_nav($count_items, $pager, $page_number, $form_id, $items_per_page = 20) {
     $limit = $items_per_page;
     if ($count_items) {
       if ($count_items % $limit) {
@@ -250,12 +250,6 @@ class WDWLibrary {
     }
     else {
       $items_county = 1;
-    }
-     if($count_items > $items_per_page){
-      $margin_top = 0;
-    }
-    else {
-      $margin_top = 12;
     }
     if (!$pager) {
     ?>
@@ -306,7 +300,7 @@ class WDWLibrary {
     </script>
     <?php } ?>
     
-    <div class="alignright tablenav-pages" style="<?php if($position_pag == '' || $count_items <= $items_per_page) {echo 'margin-top:'.$margin_top.'px';} ?>">
+    <div class="alignright tablenav-pages">
     <span class="displaying-num">
         <?php
         if ($count_items != 0) {
@@ -571,13 +565,13 @@ class WDWLibrary {
       ?>
       <span class="pagination-links_<?php echo $current_view; ?>">
         <a class="<?php echo $first_page; ?>" title="<?php echo __('Go to the first page', 'bwg'); ?>"><?php echo $first_button; ?></a>
-        <a class="<?php echo $prev_page; ?>" title="<?php echo __('Go to the previous page', 'bwg'); ?>" <?php echo  $page_number > 1 && $enable_seo ? 'href="' . add_query_arg(array("page_number_" . $current_view => $page_number - 1), $_SERVER['REQUEST_URI']) . '"' : ""; ?>><?php echo $previous_button; ?></a>
+        <a class="<?php echo $prev_page; ?>" title="<?php echo __('Go to the previous page', 'bwg'); ?>" <?php echo  $page_number > 1 && $enable_seo ? 'href="' . esc_url(add_query_arg(array("page_number_" . $current_view => $page_number - 1), $_SERVER['REQUEST_URI'])) . '"' : ""; ?>><?php echo $previous_button; ?></a>
         <span class="paging-input_<?php echo $current_view; ?>">
           <span class="total-pages_<?php echo $current_view; ?>"><?php echo $page_number; ?></span> <?php echo __('of', 'bwg'); ?> <span class="total-pages_<?php echo $current_view; ?>">
             <?php echo $items_county; ?>
           </span>
         </span>
-        <a class="<?php echo $next_page ?>" title="<?php echo __('Go to the next page', 'bwg'); ?>" <?php echo  $page_number + 1 <= $items_county && $enable_seo ? 'href="' . add_query_arg(array("page_number_" . $current_view => $page_number + 1), $_SERVER['REQUEST_URI']) . '"' : ""; ?>><?php echo $next_button; ?></a>
+        <a class="<?php echo $next_page ?>" title="<?php echo __('Go to the next page', 'bwg'); ?>" <?php echo  $page_number + 1 <= $items_county && $enable_seo ? 'href="' . esc_url(add_query_arg(array("page_number_" . $current_view => $page_number + 1), $_SERVER['REQUEST_URI'])) . '"' : ""; ?>><?php echo $next_button; ?></a>
         <a class="<?php echo $last_page ?>" title="<?php echo __('Go to the last page', 'bwg'); ?>"><?php echo $last_button; ?></a>
       </span>
       <?php

@@ -1,6 +1,12 @@
 <?php
 function spider_featured($current_plugin = '') {
   $plugins = array(
+    "ecommerce-wd" => array(
+      'title'    => 'Ecommerce',
+      'text'     => 'Wordpress ecommerce plugin',
+      'content'  => 'Ecommerce WD is a highly-functional, user friendly WordPress Ecommerce plugin, which is perfect for developing online stores for any level of complexity.',
+      'href'     => 'https://web-dorado.com/products/wordpress-ecommerce.html'
+    ),
     "form-maker" => array(
       'title'    => 'Form Maker',
       'text'     => 'Wordpress form builder plugin',

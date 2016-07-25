@@ -1,10 +1,10 @@
 === Gallery ===
 Contributors: webdorado
 Donate link: https://web-dorado.com/products/wordpress-photo-gallery-plugin.html
-Tags: photo, photo gallery, image gallery, video gallery, gallery, galleries,  wordpress gallery plugin, images gallery, album, photo albums, simple gallery, best gallery plugin, free photo gallery, wp gallery, wordpress gallery, website gallery, gallery shortcode, best gallery, picture, pictures, gallery slider, photo album, photogallery, widget gallery, image, images, photos,  gallery lightbox, photoset, wordpress photo gallery plugin, wp gallery plugins, responsive wordpress photo gallery, media, image album, filterable gallery, banner rotator, fullscreen gallery, responsive gallery, add album,  add gallery, add pictures, fotoalbum, foto, gallery decription, multiple pictures, photoalbum, upload images, upload photos, view images, view pictures, admin, AJAX, comments, gallery image, image lightbox, image rotate, image slideshow, image slider, jquery, jquery gallery, slide show, slideshow, thumbnail, thumbnail view, thumbnails, thumbs, responsive, watermarking, watermarks,fullscreen slider, lightbox, photography, sidebar, slide, youtube, vimeo, videos, instagram, facebook, mosaic, facebook integration, instagram feed, Flickr, Dailymotion, widget, youtube gallery, ecommerce
+Tags: photo, photo gallery, image gallery, video gallery, gallery, galleries,  wordpress gallery plugin, images gallery, album, photo albums, simple gallery, best gallery plugin, free photo gallery, wp gallery, wordpress gallery, website gallery, gallery shortcode, best gallery, picture, pictures, gallery slider, photo album, photogallery, widget gallery, image, images, photos,  gallery lightbox, wordpress photo gallery plugin, wp gallery plugins, responsive wordpress photo gallery, media, image album, banner rotator, fullscreen gallery, responsive gallery, add gallery, add pictures, fotoalbum, foto, multiple pictures, photoalbum, upload images, upload photos, view images, view pictures, admin, AJAX, comments, gallery image, image lightbox, image rotate, image slideshow, image slider, jquery, slide show, slideshow, thumbnail, thumbnail view, thumbnails, thumbs, responsive, watermarking, watermarks,fullscreen slider, lightbox, photography, sidebar, slide, youtube, vimeo, videos, instagram, facebook, mosaic, facebook integration, instagram feed, Flickr, Dailymotion, widget, youtube gallery, ecommerce
 Requires at least: 3.4
 Tested up to: 4.5 
-Stable tag: 1.3.0    
+Stable tag: 1.3.3    
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -224,6 +224,17 @@ We recommend to use images with the width of 1200px to 1600px. In order to speed
 To enable the feature of adding Media Library images, go to Photo Gallery > Options > Global Options and set Import from Media Library option to Yes. After that you will be able to import photos from Media Library to Photo Gallery.     
 
 == Changelog ==
+
+= 1.3.3 =
+* Added: Backend translation on Romanian (thanks to Mirel Cical).    
+* Fixed: Interval for checking for updates.    
+* Changed: Featured plugins page.   
+
+= 1.3.2 =
+* Fixed: XSS reported by Valentin Voigt.      
+  
+= 1.3.1 =
+* Fixed: Switching between blogs.   
 
 = 1.3.0 =
 * Changed: Backend design.     

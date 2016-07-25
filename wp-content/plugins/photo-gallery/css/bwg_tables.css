@@ -858,7 +858,8 @@ a.wd-btn-primary:hover, a.wd-btn-primary:active, a.wd-btn-primary:link{
   display:inline-block;
   width:97%;
 }
-input{
+
+input {
  height:30px;
 }
 
@@ -866,17 +867,24 @@ th.sortable a span,
 th.sorted a span {
   float: left;
 }
+
 #show_order_button {
   display:inline-block;
   margin: 5px auto;
   padding: 0;
   background-size: initial;
 }
+
 #current_page {
-width:35px !important;
-height:28px !important;
-padding-top:2px;
+  width:35px !important;
+  height:28px !important;
+  padding-top:2px;
 }
+
 .publish_icon {
   padding-top:11px !important;
+}
+
+.displaying-num {
+  line-height: 28px;
 }

@@ -233,20 +233,25 @@ jQuery( document ).ready( function( $ ) {
 		section.on( 'change', '.linked-post-dropdown', toggle_linked_post_fields );
 
 		/**
-		 * Populates the organizer fields with previously submitted data to
+		 * Populates the linked post type fields with previously submitted data to
 		 * give them sticky form qualities.
-		 *
-		 * @todo consider retooling to work with all linked post types
 		 *
 		 * @param fields
 		 */
 		function add_sticky_linked_post_data( post_type, container, fields ) {
-			// Bail if expected global array tribe_sticky_organizer_fields is not set
+			// Bail if expected global sticky data array is not set
 			if ( 'undefined' === typeof window['tribe_sticky_' + post_type + '_fields'] || ! $.isArray( window['tribe_sticky_' + post_type + '_fields'] ) ) {
 				return;
 			}
 
-			// The organizer fields also need sticky field behaviour: populate
+			var $fields = $( fields );
+
+			// bail if the fields are not about this container
+			if ( $fields.filter( 'tr.linked-post.' + container ).length === 0 ) {
+				return;
+			}
+
+			// The linked post type fields also need sticky field behaviour: populate
 			// them if we've been provided with the necessary data to do so
 			var sticky_data = window['tribe_sticky_' + post_type + '_fields'].shift();
 
@@ -280,7 +285,8 @@ jQuery( document ).ready( function( $ ) {
 			if ( dropdown.length ) {
 				var value = dropdown.val();
 				if ( 0 !== parseInt( value, 10 ) ) {
-					fields.hide();
+					//hide all fields, but those with not-linked class i.e. Google Map Settings
+					fields.not( '.remain-visible' ).hide();
 				}
 			} else if ( row.find( '.nosaved' ).length ) {
 				var label = row.find( 'label' );

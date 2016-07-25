@@ -51,6 +51,7 @@
 	margin: 0 auto;
 }
 
+#main_featured_plugins_page #featured-plugins-list  li.ecommerce-wd  .product {background:url("images/ecommerce.png") center center no-repeat;}
 #main_featured_plugins_page #featured-plugins-list  li.form-maker  .product {background:url("images/form.png") center center no-repeat;}
 #main_featured_plugins_page #featured-plugins-list  li.catalog  .product {background:url("images/catalog.png") center center no-repeat;}
 #main_featured_plugins_page #featured-plugins-list  li.contact-maker  .product {background:url("images/contact.maker.png") center center no-repeat;}
