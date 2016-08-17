@@ -614,6 +614,15 @@ class BWGControllerGalleries_bwg {
     $gal_id = (isset($_POST['current_id']) ? (int) $_POST['current_id'] : 0);
     $image_ids = (isset($_POST['ids_string']) ? esc_html(stripslashes($_POST['ids_string'])) : '');
     $image_id_array = explode(',', $image_ids);
+    if (isset($_POST['check_all_items']) && isset($_POST['bulk_edit']) && $_POST['bulk_edit'] == 1) {
+      $title = ((isset($_POST['title'])) ?  esc_html(stripslashes($_POST['title'])) : '');
+      $desc = ((isset($_POST['desc'])) ?  esc_html(stripslashes($_POST['desc'])) : '');
+      $redirecturl = ((isset($_POST['redirecturl'])) ?  esc_html(stripslashes($_POST['redirecturl'])) : '');
+      $wpdb->update($wpdb->prefix . 'bwg_image', array(
+        'description' => $desc,
+        'alt' => $title,
+        'redirect_url' => $redirecturl), array('gallery_id' => $gal_id));      
+    }
     foreach ($image_id_array as $image_id) {
       if ($image_id) {
         $filename = ((isset($_POST['input_filename_' . $image_id])) ? esc_html(stripslashes($_POST['input_filename_' . $image_id])) : '');

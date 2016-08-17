@@ -32,8 +32,8 @@ class FilemanagerModel {
     ////////////////////////////////////////////////////////////////////////////////////////
     public function get_file_manager_data() {
       $session_data = array();
-      $session_data['sort_by'] = $this->get_from_session('sort_by', 'name');
-      $session_data['sort_order'] = $this->get_from_session('sort_order', 'asc');
+      $session_data['sort_by'] = $this->get_from_session('sort_by', 'date_modified');
+      $session_data['sort_order'] = $this->get_from_session('sort_order', 'desc');
       $session_data['items_view'] = $this->get_from_session('items_view', 'thumbs');
       $session_data['clipboard_task'] = $this->get_from_session('clipboard_task', '');
       $session_data['clipboard_files'] = $this->get_from_session('clipboard_files', '');
@@ -164,7 +164,8 @@ class FilemanagerModel {
         }
       }
 
-      $result = $sort_order == 'asc' ? array_merge($dirs, $files) : array_merge($files, $dirs);
+      // $result = $sort_order == 'asc' ? array_merge($dirs, $files) : array_merge($files, $dirs);
+      $result = array_merge($dirs, $files);
       return $result;
     }
 

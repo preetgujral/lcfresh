@@ -235,13 +235,8 @@ var forms = function(m, i18n) {
 
 	forms.hidden = function( config ) {
 		config.placeholder('');
-
-		// if this hidden field has choices (hidden goups), glue them together by their label.
-		if( config.choices().length > 0 ) {
-			config.value( config.choices().map(function(c) {
-				return c.label();
-			}).join(','));
-		}
+		config.label('');
+		config.wrap(false);
 
 		return [
 			rows.value(config)
@@ -249,7 +244,6 @@ var forms = function(m, i18n) {
 	};
 
 	forms.submit = function(config) {
-
 		config.label('');
 		config.placeholder('');
 
@@ -274,11 +268,12 @@ var forms = function(m, i18n) {
 
 module.exports = forms;
 },{"./field-forms-rows.js":1}],3:[function(require,module,exports){
-var g = function(m) {
-	'use strict';
+'use strict';
 
-	var render = require('../third-party/render.js');
-	var html_beautify = require('../third-party/beautify-html.js');
+var render = require('../third-party/render.js');
+var html_beautify = require('../third-party/beautify-html.js');
+
+var g = function(m) {
 	var generators = {};
 
 	/**
@@ -416,7 +411,7 @@ var g = function(m) {
 };
 
 module.exports = g;
-},{"../third-party/beautify-html.js":11,"../third-party/render.js":12}],4:[function(require,module,exports){
+},{"../third-party/beautify-html.js":12,"../third-party/render.js":13}],4:[function(require,module,exports){
 var FieldHelper = function(m, tabs, editor, fields, i18n) {
 	'use strict';
 
@@ -435,6 +430,14 @@ var FieldHelper = function(m, tabs, editor, fields, i18n) {
 	 */
 	function setActiveField(index) {
 		fieldConfig = fields.get(index);
+
+		// if this hidden field has choices (hidden groups), glue them together by their label.
+		if( fieldConfig.choices().length > 0 ) {
+			fieldConfig.value( fieldConfig.choices().map(function(c) {
+				return c.label();
+			}).join('|'));
+		}
+
 		m.redraw();
 	}
 
@@ -471,38 +474,45 @@ var FieldHelper = function(m, tabs, editor, fields, i18n) {
 	function view() {
 
 		// build DOM for fields choice
+		var fieldCategories = fields.getCategories();
 		var availableFields = fields.getAll();
 
 		var fieldsChoice = m( "div.available-fields.small-margin", [
-			m("strong", i18n.chooseField),
+			m("h4", i18n.chooseField),
 
-			(availableFields.length) ?
+			fieldCategories.map(function(category) {
+				var categoryFields = availableFields.filter(function(f) {
+					return f.category === category;
+				});
 
-				// render fields
-				availableFields.map(function(field, index) {
+				if( ! categoryFields.length ) {
+					return;
+				}
 
-					var className = "button";
-					if( field.forceRequired() ) {
-						className += " is-required";
-					}
+				return m("div.tiny-margin",[
+					m("strong", category),
 
-					var inForm = field.inFormContent();
-					if( inForm !== null ) {
-						className += " " + ( inForm ? 'in-form' : 'not-in-form' );
-					}
+					// render fields
+					categoryFields.map(function(field) {
+						var className = "button";
+						if( field.forceRequired() ) {
+							className += " is-required";
+						}
 
-					return m("button", {
-							"class": className,
+						var inForm = field.inFormContent();
+						if( inForm !== null ) {
+							className += " " + ( inForm ? 'in-form' : 'not-in-form' );
+						}
+
+						return m("button", {
+							className: className,
 							type   : 'button',
 							onclick: m.withAttr("value", setActiveField),
-							value  : index
+							value  : field.index
 						}, field.title() );
-				})
-
-				:
-
-				// no fields
-				m( "p", i18n.noAvailableFields )
+					})
+				]);
+			})
 		]);
 
 		// build DOM for overlay
@@ -556,8 +566,8 @@ var FieldHelper = function(m, tabs, editor, fields, i18n) {
 };
 
 module.exports = FieldHelper;
-},{"./field-forms.js":2,"./field-generator.js":3,"./overlay.js":9}],5:[function(require,module,exports){
-var FieldFactory = function(settings, fields, i18n) {
+},{"./field-forms.js":2,"./field-generator.js":3,"./overlay.js":10}],5:[function(require,module,exports){
+var FieldFactory = function(fields, i18n) {
 	'use strict';
 
 	/**
@@ -572,18 +582,18 @@ var FieldFactory = function(settings, fields, i18n) {
 	 */
 	function reset() {
 		// clear all of our fields
-		registeredFields.forEach(function(field) {
-			fields.deregister(field);
-		});
+		registeredFields.forEach(fields.deregister);
 	}
 
 	/**
 	 * Helper function to quickly register a field and store it in local scope
 	 *
-	 * @param data
+	 * @param {object} data
+	 * @param {boolean} sticky
 	 */
-	function register(data, sticky) {
-		var field = fields.register(data);
+	function register(category, data, sticky) {
+		var field = fields.register(category, data);
+
 		if( ! sticky ) {
 			registeredFields.push(field);
 		}
@@ -591,8 +601,6 @@ var FieldFactory = function(settings, fields, i18n) {
 
 	/**
 	 * Normalizes the field type which is passed by MailChimp
-	 *
-	 * @todo Maybe do this server-side?
 	 *
 	 * @param type
 	 * @returns {*}
@@ -612,34 +620,31 @@ var FieldFactory = function(settings, fields, i18n) {
 	/**
 	 * Register the various fields for a merge var
 	 *
-	 * @param mergeVar
+	 * @param mergeField
 	 * @returns {boolean}
 	 */
-	function registerMergeVar(mergeVar) {
+	function registerMergeField(mergeField) {
 
-		// only register merge var field if it's public
-		if( ! mergeVar.public ) {
-			return false;
-		}
+		var category = i18n.listFields;
 
 		// name, type, title, value, required, label, placeholder, choices, wrap
 		var data = {
-			name: mergeVar.tag,
-			title: mergeVar.name,
-			required: mergeVar.required,
-			forceRequired: mergeVar.required,
-			type: getFieldType(mergeVar.field_type),
-			choices: mergeVar.choices
+			name: mergeField.tag,
+			title: mergeField.name,
+			required: mergeField.required,
+			forceRequired: mergeField.required,
+			type: getFieldType(mergeField.field_type),
+			choices: mergeField.choices
 		};
 
 		if( data.type !== 'address' ) {
-			register(data);
+			register(category, data, false);
 		} else {
-			register({ name: data.name + '[addr1]', type: 'text', title: i18n.streetAddress });
-			register({ name: data.name + '[city]', type: 'text', title: i18n.city });
-			register({ name: data.name + '[state]', type: 'text', title: i18n.state  });
-			register({ name: data.name + '[zip]', type: 'text', title: i18n.zip });
-			register({ name: data.name + '[country]', type: 'select', title: i18n.country, choices: mc4wp_vars.countries });
+			register(category, { name: data.name + '[addr1]', type: 'text', title: i18n.streetAddress });
+			register(category, { name: data.name + '[city]', type: 'text', title: i18n.city });
+			register(category, { name: data.name + '[state]', type: 'text', title: i18n.state  });
+			register(category, { name: data.name + '[zip]', type: 'text', title: i18n.zip });
+			register(category, { name: data.name + '[country]', type: 'select', title: i18n.country, choices: mc4wp_vars.countries });
 		}
 
 		return true;
@@ -648,17 +653,18 @@ var FieldFactory = function(settings, fields, i18n) {
 	/**
 	 * Register a field for a MailChimp grouping
 	 *
-	 * @param grouping
+	 * @param interestCategory
 	 */
-	function registerGrouping(grouping){
+	function registerInterestCategory(interestCategory){
+		var category = i18n.interestCategories;
 
 		var data = {
-			title: grouping.name,
-			name: 'GROUPINGS[' + grouping.id + ']',
-			type: getFieldType(grouping.field_type),
-			choices: grouping.groups
+			title: interestCategory.name,
+			name: 'INTERESTS[' + interestCategory.id + ']',
+			type: getFieldType(interestCategory.field_type),
+			choices: interestCategory.interests
 		};
-		register(data);
+		register(category, data, false);
 	}
 
 	/**
@@ -667,11 +673,25 @@ var FieldFactory = function(settings, fields, i18n) {
 	 * @param list
 	 */
 	function registerListFields(list) {
+
+		// make sure EMAIL && public fields come first
+		list.merge_fields = list.merge_fields.sort(function(a, b) {
+			if( a.tag === 'EMAIL' || ( a.public && ! b.public ) ) {
+				return -1;
+			}
+
+			if( ! a.public && b.public ) {
+				return 1;
+			}
+
+			return 0;
+		});
+
 		// loop through merge vars
-		list.merge_vars.forEach(registerMergeVar);
+		list.merge_fields.forEach(registerMergeField);
 
 		// loop through groupings
-		list.groupings.forEach(registerGrouping);
+		list.interest_categories.forEach(registerInterestCategory);
 	}
 
 	/**
@@ -686,10 +706,11 @@ var FieldFactory = function(settings, fields, i18n) {
 
 	function registerCustomFields(lists) {
 
-		var choices;
+		var choices,
+			category = i18n.formFields;
 
 		// register submit button
-		register({
+		register(category, {
 			name: '',
 			value: i18n.subscribe,
 			type: "submit",
@@ -702,7 +723,7 @@ var FieldFactory = function(settings, fields, i18n) {
 			choices[lists[key].id] = lists[key].name;
 		}
 
-		register({
+		register(category, {
 			name: '_mc4wp_lists',
 			type: 'checkbox',
 			title: i18n.listChoice,
@@ -714,7 +735,7 @@ var FieldFactory = function(settings, fields, i18n) {
 			'subscribe': "Subscribe",
 			'unsubscribe': "Unsubscribe"
 		};
-		register({
+		register(category, {
 			name: '_mc4wp_action',
 			type: 'radio',
 			title: i18n.formAction,
@@ -737,8 +758,13 @@ var FieldFactory = function(settings, fields, i18n) {
 
 module.exports = FieldFactory;
 },{}],6:[function(require,module,exports){
+'use strict';
+
 module.exports = function(m, events) {
-	'use strict';
+    var timeout;
+	var fields = [];
+	var categories = [];
+
 
 	/**
 	 * @internal
@@ -796,15 +822,6 @@ module.exports = function(m, events) {
 		this.value = m.prop(data.value || data.label);
 	};
 
-
-	/**
-	 * @api
-	 *
-	 * @returns {{fields: {}, get: get, getAll: getAll, deregister: deregister, register: register}}
-	 * @constructor
-	 */
-	var fields = [];
-
 	/**
 	 * Creates FieldChoice objects from an (associative) array of data objects
 	 *
@@ -835,7 +852,8 @@ module.exports = function(m, events) {
 	 * @param data
 	 * @returns {Field}
 	 */
-	function register(data) {
+	function register(category, data) {
+
 		var field;
 		var existingField = getAllWhere('name', data.name).shift();
 
@@ -865,14 +883,21 @@ module.exports = function(m, events) {
 			}
 		}
 
+		// register category
+		if( categories.indexOf(category) < 0 ) {
+			categories.push(category);
+		}
+
 		// create Field object
 		field = new Field(data);
+		field.category = category;
 
-		// add to start of array
-		fields.unshift(field);
+		// add to array
+		fields.push(field);
 
 		// redraw view
-		m.redraw();
+        timeout && window.clearTimeout(timeout);
+        timeout = window.setTimeout(m.redraw, 100);
 
 		// trigger event
 		events.trigger('fields.change');
@@ -909,7 +934,17 @@ module.exports = function(m, events) {
 	 * @returns {Array|*}
 	 */
 	function getAll() {
+		// rebuild index property on all fields
+		fields = fields.map(function(f, i) {
+			f.index = i;
+			return f;
+		});
+
 		return fields;
+	}
+
+	function getCategories() {
+		return categories;
 	}
 
 	/**
@@ -930,16 +965,27 @@ module.exports = function(m, events) {
 	 * Exposed methods
 	 */
 	return {
-		'fields'     : fields,
 		'get'        : get,
 		'getAll'     : getAll,
+		'getCategories': getCategories,
 		'deregister' : deregister,
 		'register'   : register,
 		'getAllWhere': getAllWhere
 	};
 };
 },{}],7:[function(require,module,exports){
-/* Editor */
+'use strict';
+
+// load CodeMirror & plugins
+var CodeMirror = require('codemirror');
+require('codemirror/mode/xml/xml');
+require('codemirror/mode/javascript/javascript');
+require('codemirror/mode/css/css');
+require('codemirror/mode/htmlmixed/htmlmixed');
+require('codemirror/addon/fold/xml-fold');
+require('codemirror/addon/edit/matchtags');
+require('codemirror/addon/edit/closetag.js');
+
 var FormEditor = function(element) {
 
 	// create dom representation of form
@@ -947,17 +993,8 @@ var FormEditor = function(element) {
 		domDirty = false,
 		r = {},
 		editor;
-	_dom.innerHTML = element.value.toLowerCase();
 
-	// load CodeMirror & plugins
-	var CodeMirror = require('codemirror');
-	require('codemirror/mode/xml/xml');
-	require('codemirror/mode/javascript/javascript');
-	require('codemirror/mode/css/css');
-	require('codemirror/mode/htmlmixed/htmlmixed');
-	require('codemirror/addon/fold/xml-fold');
-	require('codemirror/addon/edit/matchtags');
-	require('codemirror/addon/edit/closetag.js');
+	_dom.innerHTML = element.value.toLowerCase();
 
 	if( CodeMirror ) {
 		editor = CodeMirror.fromTextArea(element, {
@@ -979,8 +1016,12 @@ var FormEditor = function(element) {
 		});
 	}
 
+	window.addEventListener('load', function() {
+		CodeMirror.signal(editor, "change");
+	});
+
 	// set domDirty to true everytime the "change" event fires (a lot..)
-	element.addEventListener && element.addEventListener('change',function() {
+	element.addEventListener('change',function() {
 		domDirty = true;
 	});
 
@@ -994,11 +1035,7 @@ var FormEditor = function(element) {
 	}
 
 	r.getValue = function() {
-		if( editor ) {
-			return editor.getValue();
-		}
-
-		return element.value;
+		return editor ? editor.getValue() : element.value;
 	};
 
 	r.query = function(query) {
@@ -1020,12 +1057,8 @@ var FormEditor = function(element) {
 
 	r.on = function(event,callback) {
 		if( editor ) {
-
 			// translate "input" event for CodeMirror
-			if( event === 'input' ) {
-				event = 'changes';
-			}
-
+			event = ( event === 'input' ) ? 'changes' : event;
 			return editor.on(event,callback);
 		}
 
@@ -1040,7 +1073,7 @@ var FormEditor = function(element) {
 };
 
 module.exports = FormEditor;
-},{"codemirror":16,"codemirror/addon/edit/closetag.js":13,"codemirror/addon/edit/matchtags":14,"codemirror/addon/fold/xml-fold":15,"codemirror/mode/css/css":17,"codemirror/mode/htmlmixed/htmlmixed":18,"codemirror/mode/javascript/javascript":19,"codemirror/mode/xml/xml":20}],8:[function(require,module,exports){
+},{"codemirror":17,"codemirror/addon/edit/closetag.js":14,"codemirror/addon/edit/matchtags":15,"codemirror/addon/fold/xml-fold":16,"codemirror/mode/css/css":18,"codemirror/mode/htmlmixed/htmlmixed":19,"codemirror/mode/javascript/javascript":20,"codemirror/mode/xml/xml":21}],8:[function(require,module,exports){
 var FormWatcher = function(m, editor, settings, fields, events, helpers) {
 	'use strict';
 
@@ -1101,6 +1134,55 @@ var FormWatcher = function(m, editor, settings, fields, events, helpers) {
 
 module.exports = FormWatcher;
 },{}],9:[function(require,module,exports){
+'use strict';
+
+var notices = [];
+
+function show(txt) {
+    var index = notices.indexOf(txt);
+    if( index < 0 ) {
+        notices.push(txt);
+        render();
+    }
+}
+
+function hide(txt) {
+    var index = notices.indexOf(txt);
+    if( index > -1 ) {
+        notices.splice(index, 1);
+        render();
+    }
+}
+
+function render() {
+    var html = '';
+    for( var i=0; i<notices.length; i++) {
+        html += '<div class="notice notice-warning"><p>' + notices[i] + '</p></div>';
+    }
+
+    var container = document.querySelector('.mc4wp-notices');
+    if( ! container ) {
+        container = document.createElement('div');
+        container.className = 'mc4wp-notices';
+        var heading = document.querySelector('h1');
+        heading.parentNode.insertBefore(container, heading.nextSibling);
+    }
+    
+    container.innerHTML = html;
+}
+
+function init( editor ) {
+    editor.on('change', function() {
+        var text = "Your form contains old style <code>GROUPINGS</code> fields. <br /><br />Please remove these fields from your form and then re-add them through the available field buttons to make sure your data is getting through to MailChimp correctly.";
+        var formCode = editor.getValue().toLowerCase();
+        formCode.indexOf('name="groupings') > -1 ? show(text) : hide(text);
+    });
+}
+
+module.exports = {
+    "init": init
+};
+},{}],10:[function(require,module,exports){
 var overlay = function(m, i18n) {
 	'use strict';
 
@@ -1176,7 +1258,7 @@ var overlay = function(m, i18n) {
 };
 
 module.exports = overlay;
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 // deps
@@ -1198,16 +1280,21 @@ var textareaElement = document.getElementById('mc4wp-form-content');
 var editor = window.formEditor = new FormEditor( textareaElement );
 var watcher = new FormWatcher( m, formEditor, settings, fields, events, helpers );
 var fieldHelper = new FieldHelper( m, tabs, formEditor, fields, i18n );
+var notices = require('./admin/notices');
 
 // mount field helper on element
 m.mount( document.getElementById( 'mc4wp-field-wizard'), fieldHelper );
 
 // register fields and redraw screen in 2 seconds (fixes IE8 bug)
-var fieldsFactory = new FieldsFactory(settings, fields, i18n);
-fieldsFactory.registerCustomFields(mc4wp_vars.mailchimp.lists);
+var fieldsFactory = new FieldsFactory(fields, i18n);
 events.on('selectedLists.change', fieldsFactory.registerListsFields);
 fieldsFactory.registerListsFields(settings.getSelectedLists());
+fieldsFactory.registerCustomFields(mc4wp_vars.mailchimp.lists);
+
 window.setTimeout( function() { m.redraw();}, 2000 );
+
+// init notices
+notices.init(editor);
 
 // expose some methods
 window.mc4wp = window.mc4wp || {};
@@ -1215,7 +1302,7 @@ window.mc4wp.forms = window.mc4wp.forms || {};
 window.mc4wp.forms.editor = editor;
 window.mc4wp.forms.fields = fields;
 
-},{"./admin/field-helper.js":4,"./admin/fields-factory.js":5,"./admin/fields.js":6,"./admin/form-editor.js":7,"./admin/form-watcher.js":8}],11:[function(require,module,exports){
+},{"./admin/field-helper.js":4,"./admin/fields-factory.js":5,"./admin/fields.js":6,"./admin/form-editor.js":7,"./admin/form-watcher.js":8,"./admin/notices":9}],12:[function(require,module,exports){
 /*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
 /*
 
@@ -2032,7 +2119,7 @@ window.mc4wp.forms.fields = fields;
 	}
 
 }());
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var VOID_TAGS = ['area', 'base', 'br', 'col', 'command', 'embed', 'hr',
@@ -2148,7 +2235,7 @@ function render(view) {
 }
 
 module.exports = render;
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -2319,7 +2406,7 @@ module.exports = render;
   }
 });
 
-},{"../../lib/codemirror":16,"../fold/xml-fold":15}],14:[function(require,module,exports){
+},{"../../lib/codemirror":17,"../fold/xml-fold":16}],15:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -2387,7 +2474,7 @@ module.exports = render;
   };
 });
 
-},{"../../lib/codemirror":16,"../fold/xml-fold":15}],15:[function(require,module,exports){
+},{"../../lib/codemirror":17,"../fold/xml-fold":16}],16:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -2571,7 +2658,7 @@ module.exports = render;
   };
 });
 
-},{"../../lib/codemirror":16}],16:[function(require,module,exports){
+},{"../../lib/codemirror":17}],17:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -3795,7 +3882,7 @@ module.exports = render;
   };
 
   function hiddenTextarea() {
-    var te = elt("textarea", null, null, "position: absolute; padding: 0; width: 1px; height: 1em; outline: none");
+    var te = elt("textarea", null, null, "position: absolute; bottom: -1em; padding: 0; width: 1px; height: 1em; outline: none");
     var div = elt("div", [te], null, "overflow: hidden; position: relative; width: 3px; height: 0px;");
     // The textarea is kept positioned near the cursor to prevent the
     // fact that it'll be scrolled into view on input from scrolling
@@ -5262,6 +5349,16 @@ module.exports = render;
     return {node: node, start: start, end: end, collapse: collapse, coverStart: mStart, coverEnd: mEnd};
   }
 
+  function getUsefulRect(rects, bias) {
+    var rect = nullRect
+    if (bias == "left") for (var i = 0; i < rects.length; i++) {
+      if ((rect = rects[i]).left != rect.right) break
+    } else for (var i = rects.length - 1; i >= 0; i--) {
+      if ((rect = rects[i]).left != rect.right) break
+    }
+    return rect
+  }
+
   function measureCharInner(cm, prepared, ch, bias) {
     var place = nodeAndOffsetInLineMap(prepared.map, ch, bias);
     var node = place.node, start = place.start, end = place.end, collapse = place.collapse;
@@ -5271,17 +5368,10 @@ module.exports = render;
       for (var i = 0; i < 4; i++) { // Retry a maximum of 4 times when nonsense rectangles are returned
         while (start && isExtendingChar(prepared.line.text.charAt(place.coverStart + start))) --start;
         while (place.coverStart + end < place.coverEnd && isExtendingChar(prepared.line.text.charAt(place.coverStart + end))) ++end;
-        if (ie && ie_version < 9 && start == 0 && end == place.coverEnd - place.coverStart) {
+        if (ie && ie_version < 9 && start == 0 && end == place.coverEnd - place.coverStart)
           rect = node.parentNode.getBoundingClientRect();
-        } else if (ie && cm.options.lineWrapping) {
-          var rects = range(node, start, end).getClientRects();
-          if (rects.length)
-            rect = rects[bias == "right" ? rects.length - 1 : 0];
-          else
-            rect = nullRect;
-        } else {
-          rect = range(node, start, end).getBoundingClientRect() || nullRect;
-        }
+        else
+          rect = getUsefulRect(range(node, start, end).getClientRects(), bias)
         if (rect.left || rect.right || start == 0) break;
         end = start;
         start = start - 1;
@@ -6993,7 +7083,7 @@ module.exports = render;
 
   // Revert a change stored in a document's history.
   function makeChangeFromHistory(doc, type, allowSelectionOnly) {
-    if (doc.cm && doc.cm.state.suppressEdits) return;
+    if (doc.cm && doc.cm.state.suppressEdits && !allowSelectionOnly) return;
 
     var hist = doc.history, event, selAfter = doc.sel;
     var source = type == "undo" ? hist.done : hist.undone, dest = type == "undo" ? hist.undone : hist.done;
@@ -9518,6 +9608,7 @@ module.exports = render;
     var content = elt("span", null, null, webkit ? "padding-right: .1px" : null);
     var builder = {pre: elt("pre", [content], "CodeMirror-line"), content: content,
                    col: 0, pos: 0, cm: cm,
+                   trailingSpace: false,
                    splitSpaces: (ie || webkit) && cm.getOption("lineWrapping")};
     lineView.measure = {};
 
@@ -9579,7 +9670,7 @@ module.exports = render;
   // the line map. Takes care to render special characters separately.
   function buildToken(builder, text, style, startStyle, endStyle, title, css) {
     if (!text) return;
-    var displayText = builder.splitSpaces ? text.replace(/ {3,}/g, splitSpaces) : text;
+    var displayText = builder.splitSpaces ? splitSpaces(text, builder.trailingSpace) : text
     var special = builder.cm.state.specialChars, mustWrap = false;
     if (!special.test(text)) {
       builder.col += text.length;
@@ -9624,6 +9715,7 @@ module.exports = render;
         builder.pos++;
       }
     }
+    builder.trailingSpace = displayText.charCodeAt(text.length - 1) == 32
     if (style || startStyle || endStyle || mustWrap || css) {
       var fullStyle = style || "";
       if (startStyle) fullStyle += startStyle;
@@ -9635,11 +9727,17 @@ module.exports = render;
     builder.content.appendChild(content);
   }
 
-  function splitSpaces(old) {
-    var out = " ";
-    for (var i = 0; i < old.length - 2; ++i) out += i % 2 ? " " : "\u00a0";
-    out += " ";
-    return out;
+  function splitSpaces(text, trailingBefore) {
+    if (text.length > 1 && !/  /.test(text)) return text
+    var spaceBefore = trailingBefore, result = ""
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i)
+      if (ch == " " && spaceBefore && (i == text.length - 1 || text.charCodeAt(i + 1) == 32))
+        ch = "\u00a0"
+      result += ch
+      spaceBefore = ch == " "
+    }
+    return result
   }
 
   // Work around nonsense dimensions being reported for stretches of
@@ -9676,6 +9774,7 @@ module.exports = render;
       builder.content.appendChild(widget);
     }
     builder.pos += size;
+    builder.trailingSpace = false
   }
 
   // Outputs a number of spans to make up a line, taking highlighting
@@ -11123,8 +11222,9 @@ module.exports = render;
     if (badBidiRects != null) return badBidiRects;
     var txt = removeChildrenAndAdd(measure, document.createTextNode("A\u062eA"));
     var r0 = range(txt, 0, 1).getBoundingClientRect();
-    if (!r0 || r0.left == r0.right) return false; // Safari returns null in some cases (#2780)
     var r1 = range(txt, 1, 2).getBoundingClientRect();
+    removeChildren(measure);
+    if (!r0 || r0.left == r0.right) return false; // Safari returns null in some cases (#2780)
     return badBidiRects = (r1.right - r0.right < 3);
   }
 
@@ -11490,12 +11590,12 @@ module.exports = render;
 
   // THE END
 
-  CodeMirror.version = "5.16.0";
+  CodeMirror.version = "5.17.0";
 
   return CodeMirror;
 });
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -12322,7 +12422,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
 
 });
 
-},{"../../lib/codemirror":16}],18:[function(require,module,exports){
+},{"../../lib/codemirror":17}],19:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -12476,7 +12576,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
   CodeMirror.defineMIME("text/html", "htmlmixed");
 });
 
-},{"../../lib/codemirror":16,"../css/css":17,"../javascript/javascript":19,"../xml/xml":20}],19:[function(require,module,exports){
+},{"../../lib/codemirror":17,"../css/css":18,"../javascript/javascript":20,"../xml/xml":21}],20:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -12865,8 +12965,8 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     var maybeop = noComma ? maybeoperatorNoComma : maybeoperatorComma;
     if (atomicTypes.hasOwnProperty(type)) return cont(maybeop);
     if (type == "function") return cont(functiondef, maybeop);
-    if (type == "keyword c") return cont(noComma ? maybeexpressionNoComma : maybeexpression);
-    if (type == "(") return cont(pushlex(")"), maybeexpression, comprehension, expect(")"), poplex, maybeop);
+    if (type == "keyword c" || type == "async") return cont(noComma ? maybeexpressionNoComma : maybeexpression);
+    if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeop);
     if (type == "operator" || type == "spread") return cont(noComma ? expressionNoComma : expression);
     if (type == "[") return cont(pushlex("]"), arrayLiteral, poplex, maybeop);
     if (type == "{") return contCommasep(objprop, "}", null, maybeop);
@@ -12942,6 +13042,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "variable") {cx.marked = "property"; return cont();}
   }
   function objprop(type, value) {
+    if (type == "async") return cont(objprop);
     if (type == "variable" || cx.style == "keyword") {
       cx.marked = "property";
       if (value == "get" || value == "set") return cont(getterSetter);
@@ -12973,7 +13074,10 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       if (type == ",") {
         var lex = cx.state.lexical;
         if (lex.info == "call") lex.pos = (lex.pos || 0) + 1;
-        return cont(what, proceed);
+        return cont(function(type, value) {
+          if (type == end || value == end) return pass()
+          return pass(what)
+        }, proceed);
       }
       if (type == end || value == end) return cont();
       return cont(expect(end));
@@ -13116,16 +13220,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   }
   function arrayLiteral(type) {
     if (type == "]") return cont();
-    return pass(expressionNoComma, maybeArrayComprehension);
-  }
-  function maybeArrayComprehension(type) {
-    if (type == "for") return pass(comprehension, expect("]"));
-    if (type == ",") return cont(commasep(maybeexpressionNoComma, "]"));
-    return pass(commasep(expressionNoComma, "]"));
-  }
-  function comprehension(type) {
-    if (type == "for") return cont(forspec, comprehension);
-    if (type == "if") return cont(expression, comprehension);
+    return pass(expressionNoComma, commasep(expressionNoComma, "]"));
   }
 
   function isContinuedStatement(state, textAfter) {
@@ -13226,7 +13321,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
 
 });
 
-},{"../../lib/codemirror":16}],20:[function(require,module,exports){
+},{"../../lib/codemirror":17}],21:[function(require,module,exports){
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
 
@@ -13622,5 +13717,5 @@ if (!CodeMirror.mimeModes.hasOwnProperty("text/html"))
 
 });
 
-},{"../../lib/codemirror":16}]},{},[10]);
+},{"../../lib/codemirror":17}]},{},[11]);
  })();

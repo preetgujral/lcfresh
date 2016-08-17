@@ -31,16 +31,18 @@ class BWGViewEditThumb {
     
     $instagram_post_width = ((int) (isset($_GET['instagram_post_width']) ? esc_html($_GET['instagram_post_width']) : $image_width));
     $instagram_post_height = ((int) (isset($_GET['instagram_post_height']) ? esc_html($_GET['instagram_post_height']) : $image_height));
-    
-    if ($image_height / ($instagram_post_height + 96) < $image_width / $instagram_post_width) {
-      $instagram_post_width = ($image_height - 96) * $instagram_post_width / $instagram_post_height + 16;
-      $instagram_post_height = $image_height;
+
+    if ($instagram_post_width) {
+      if ($image_height / ($instagram_post_height + 96) < $image_width / $instagram_post_width) {
+        $instagram_post_width = ($image_height - 96) * $instagram_post_width / $instagram_post_height + 16;
+        $instagram_post_height = $image_height;
+      }
+      else {
+        $instagram_post_height = ($image_width - 16) * $instagram_post_height / $instagram_post_width + 16;
+        $instagram_post_width = $image_width;
+      }
     }
-    else {
-      $instagram_post_height = ($image_width - 16) * $instagram_post_height / $instagram_post_width + 16;
-      $instagram_post_width = $image_width;
-    }
-    
+
     $image_id = (isset($_GET['image_id']) ? esc_html($_GET['image_id']) : '0');
     ?>
     <div style="display:table; width:100%; height:<?php echo $popup_height; ?>px;">

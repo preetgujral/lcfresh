@@ -1,0 +1,156 @@
+.al_opt_container {
+ clear:both;
+ display: inline-block;
+ width: 100%;
+ margin-top:1px;
+ margin-bottom:0px;
+}
+
+.al_border {
+ border-bottom: 1px solid #ddd;
+}
+
+.al_label {
+ display:block;
+ float:left;
+ width:30%;
+ padding-left: 4px;
+}
+
+.al_opt_details {
+ margin: 0px 0px 0px 31%;
+}
+
+.al_input {
+ display: inline;
+ margin-right:10px;
+}
+
+.al_fixed_width {
+ width:200px;
+}
+
+
+.al_fixed_width_wide {
+ width:400px;
+}
+
+.al_pad {
+ margin-bottom:4px;
+}
+
+.al_pad_top {
+ margin-top:1em;
+}
+.al_pad_bottom {
+ margin-bottom:1em;
+}
+
+.al_description {
+ font-size:80%;
+ clear:both;
+}
+
+.al_section_head  {  
+    cursor:pointer;  
+    font-weight:bold;  
+    float:left;  
+    padding:0px;  
+    margin:2px;  
+} 
+
+input.al_hide-1,.al_hide-1,#al_buttons input.al_hide-1 {
+ display:none;
+}
+input.al_show-0,.al_show-0,#al_buttons input.al_show-0 {
+ display:none;
+}
+
+.al_subheading {
+ font-size:120%;
+ padding-left: 4px;
+ padding-bottom: 4px;
+}
+
+.al_sub_head {
+ border-bottom: 1px dotted #aaaaaa;
+ margin: 2px 0 2px 0;
+ padding: 2px 0 2px 0;
+}
+
+.al_para {
+ padding-left: 4px;
+}
+
+.al_section {
+    border: 1px solid #ddd;
+    padding:0px;  
+    margin:0px;  
+}
+
+.al_subhead1 h4, .al_subhead h4  {  
+    cursor:pointer;  
+    font-weight:normal;  
+    padding:0px;  
+    margin:2px;
+}  
+
+.al_subhead1, .al_subhead {  
+    cursor:pointer;  
+    border-bottom:1px solid #ddd;  
+    background:#eee;  
+    padding:2px;  
+    margin-bottom:1px;  
+} 
+
+.al_subhead2 {  
+    cursor:pointer;  
+    border-bottom:1px solid #ddd;
+    font-size: 110%;
+    background:#eee;  
+    padding:2px;  
+    padding-bottom:1em;  
+    padding-top:1em;
+}
+
+.al_highlight { background:#fffbe4; }
+
+.al_highlight h4 {
+    background:#fffbe4;
+}
+
+
+#amazon-link-error {
+ font-size: 1em;
+ border: 1px solid;
+ padding: 2px;
+ background:#fffbe4;
+}
+
+.amazon-link-info-heading {
+ padding: 2px;
+ margin-top: 2px;
+ margin-bottom: 6px;
+ font: italic normal normal 24px/29px Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+ font-size: 1.5em;
+}
+
+.amazon-link-info dl{
+ clear:both;
+ display: inline-block;
+ width: 100%;
+ margin-top:1px;
+ margin-bottom:0px;
+}
+
+.amazon-link-info dt{
+/* display:inline;*/
+ display:block;
+ width:40%;
+ float:left;
+ padding-left: 4px;
+}
+
+.amazon-link-info dd {
+ margin: 0px 0px 0px 41%;
+}

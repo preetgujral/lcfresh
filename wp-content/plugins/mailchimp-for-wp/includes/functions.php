@@ -10,9 +10,13 @@
  *
  * When no service parameter is given, the entire container will be returned.
  *
+ * @ignore
+ * @access private
+ *
  * @param string $service (optional)
+ * @return mixed
+ *
  * @throws Exception when service is not found
- * @return object
  */
 function mc4wp( $service = null ) {
 	static $mc4wp;
@@ -34,7 +38,7 @@ function mc4wp( $service = null ) {
  *
  * @since 1.0
  * @access public
- * @staticvar array $options
+ * @static array $options
  * @return array
  */
 function mc4wp_get_options() {
@@ -54,11 +58,25 @@ function mc4wp_get_options() {
 	return apply_filters( 'mc4wp_settings', $options );
 }
 
+/**
+ * Gets the MailChimp for WP API class (v3) and injects it with the API key
+ *
+ * @since 4.0
+ * @access public
+ *
+ * @return MC4WP_API_v3
+ */
+function mc4wp_get_api_v3() {
+	$opts = mc4wp_get_options();
+	$instance = new MC4WP_API_v3( $opts['api_key'] );
+	return $instance;
+}
 
 /**
  * Gets the MailChimp for WP API class and injects it with the API key
  *
- * @staticvar $instance
+ * @deprecated 4.0
+ * @use mc4wp_get_api_v3
  *
  * @since 1.0
  * @access public
@@ -66,6 +84,7 @@ function mc4wp_get_options() {
  * @return MC4WP_API
  */
 function mc4wp_get_api() {
+	_deprecated_function( __FUNCTION__, '4.0', 'mc4wp_get_api_v3' );
 	$opts = mc4wp_get_options();
 	$instance = new MC4WP_API( $opts['api_key'] );
 	return $instance;
@@ -154,47 +173,118 @@ function mc4wp_sanitize_deep( $value ) {
 }
 
 /**
+ *
+ * @since 4.0
+ * @ignore
+ *
+ * @param array $data
+ * @return array
+ */
+function __mc4wp_update_groupings_data( $data = array() ) {
+
+    // data still has old "GROUPINGS" key?
+	if( empty( $data['GROUPINGS'] ) ) {
+        return $data;
+    }
+
+    // prepare new key
+    if( ! isset( $data['INTERESTS'] ) ) {
+        $data['INTERESTS'] = array();
+    }
+
+    $map = get_option( 'mc4wp_groupings_map', array() );
+
+    foreach( $data['GROUPINGS'] as $grouping_id => $groups ) {
+
+        // for compatibility with expanded grouping arrays
+        $grouping_key = $grouping_id;
+        if( is_array( $groups ) && isset( $groups['id'] ) && isset( $groups['groups'] ) ) {
+            $grouping_id = $groups['id'];
+            $groups = $groups['groups'];
+        }
+
+        // do we have transfer data for this grouping id?
+        if( ! isset( $map[ $grouping_id ] ) ) {
+            continue;
+        }
+
+        // if we get a string, explode on delimiter(s)
+        if( is_string( $groups ) ) {
+            // for BC with 3.x: explode on comma's
+            $groups = join( '|', explode(',', $groups ) );
+
+            // explode on current delimiter
+            $groups = explode( '|', $groups );
+        }
+
+        // loop through groups and find interest ID
+        $migrated = 0;
+        foreach( $groups as $key => $group_name_or_id ) {
+
+            // do we know the new interest ID?
+            if( empty( $map[ $grouping_id ]['groups'][ $group_name_or_id ] ) ) {
+                continue;
+            }
+
+            $interest_id = $map[ $grouping_id ]['groups'][ $group_name_or_id ];
+
+            // add to interests data
+            if( ! in_array( $interest_id, $data['INTERESTS'] ) ) {
+                $migrated++;
+                $data['INTERESTS'][] = $interest_id;
+            }
+        }
+        
+        // remove old grouping ID if we migrated all groups.
+        if( $migrated === count( $groups ) ) {
+            unset( $data['GROUPINGS'][$grouping_key] );
+        }
+    }
+
+	// if everything went well, this is now empty & moved to new INTERESTS key.
+	if( empty( $data['GROUPINGS'] ) ) {
+		unset( $data['GROUPINGS'] );
+	}
+
+	// is this empty? just unset it then.
+	if( empty( $data['INTERESTS'] ) ) {
+	    unset( $data['INTERESTS'] );
+    }
+	
+	return $data;
+}
+
+/**
  * Guesses merge vars based on given data & current request.
  *
  * @since 3.0
  * @access public
  *
- * @param array $merge_vars
+ * @param array $data
  *
  * @return array
  */
-function mc4wp_guess_merge_vars( $merge_vars = array() ) {
+function mc4wp_add_name_data( $data = array() ) {
 
-	// maybe guess first and last name
-	if ( isset( $merge_vars['NAME'] ) ) {
-		if( ! isset( $merge_vars['FNAME'] ) && ! isset( $merge_vars['LNAME'] ) ) {
-			$strpos = strpos( $merge_vars['NAME'], ' ' );
-			if ( $strpos !== false ) {
-				$merge_vars['FNAME'] = trim( substr( $merge_vars['NAME'], 0, $strpos ) );
-				$merge_vars['LNAME'] = trim( substr( $merge_vars['NAME'], $strpos ) );
-			} else {
-				$merge_vars['FNAME'] = $merge_vars['NAME'];
-			}
+	// Guess first and last name
+	if ( ! empty( $data['NAME'] ) && empty( $data['FNAME'] ) && empty( $data['LNAME'] ) ) {
+        $data['NAME'] = trim( $data['NAME'] );
+		$strpos = strpos( $data['NAME'], ' ' );
+
+		if ( $strpos !== false ) {
+			$data['FNAME'] = trim( substr( $data['NAME'], 0, $strpos ) );
+			$data['LNAME'] = trim( substr( $data['NAME'], $strpos ) );
+		} else {
+			$data['FNAME'] = $data['NAME'];
 		}
 	}
 
-	// set ip address
-	if( empty( $merge_vars['OPTIN_IP'] ) ) {
-		$optin_ip = mc4wp('request')->get_client_ip();
-
-		if( ! empty( $optin_ip ) ) {
-			$merge_vars['OPTIN_IP'] = $optin_ip;
-		}
+	// Set name value
+	if( empty( $data['NAME'] ) && ! empty( $data['FNAME'] ) && ! empty( $data['LNAME'] ) ) {
+		$data['NAME'] = sprintf( '%s %s', $data['FNAME'], $data['LNAME'] );
 	}
-
-	/**
-	 * Filters merge vars which are sent to MailChimp
-	 *
-	 * @param array $merge_vars
-	 */
-	$merge_vars = (array) apply_filters( 'mc4wp_merge_vars', $merge_vars );
-
-	return $merge_vars;
+	
+	return $data;
 }
 
 /**
@@ -216,7 +306,7 @@ function mc4wp_get_email_type() {
 	 *
 	 * @param string $email_type
 	 */
-	$email_type = apply_filters( 'mc4wp_email_type', $email_type );
+	$email_type = (string) apply_filters( 'mc4wp_email_type', $email_type );
 
 	return $email_type;
 }

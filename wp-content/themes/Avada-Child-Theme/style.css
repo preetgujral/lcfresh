@@ -7,10 +7,23 @@ Template: Avada
 Version: 1.0.0
 Text Domain:  Avada
 */
+
+/*
+Center Amazon Affiliate widget content
+*/
+
+.textwidget {
+  text-align: center;
+}
+
+.amzn-ad-container {
+  display: inline-block;
+}
+
 /* change position of mobile menu in relation to header*/
 .fusion-icon-bars {
   position: absolute;
-  top: 88px;
+  top: 26px;
   right: 0px;
 }
 

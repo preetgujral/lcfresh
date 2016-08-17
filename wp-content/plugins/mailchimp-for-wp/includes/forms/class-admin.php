@@ -64,17 +64,20 @@ class MC4WP_Forms_Admin {
 			'checkboxes'    => __( 'Checkboxes', 'mailchimp-for-wp' ),
 			'choices'       => __( 'Choices', 'mailchimp-for-wp' ),
 			'choiceType'    => __( "Choice type", 'mailchimp-for-wp' ),
-			'chooseField'   => __( "Choose a MailChimp field to add to the form", 'mailchimp-for-wp' ),
+			'chooseField'   => __( "Choose a field to add to the form", 'mailchimp-for-wp' ),
 			'close'         => __( 'Close', 'mailchimp-for-wp' ),
 			'country'       => __( 'Country', 'mailchimp-for-wp' ),
 			'dropdown'      => __( 'Dropdown', 'mailchimp-for-wp' ),
 			'fieldLabel'    => __( "Field label", 'mailchimp-for-wp' ),
 			'formAction'    => __( 'Form action', 'mailchimp-for-wp' ),
 			'formActionDescription' => __( 'This field will allow your visitors to choose whether they would like to subscribe or unsubscribe', 'mailchimp-for-wp' ),
-			'forceRequired' => __( 'This field is marked as required in MailChimp.', 'mailchimp-for-wp' ),
+			'formFields'    => __( 'Form fields', 'mailchimp-for-wp' ),
+            'forceRequired' => __( 'This field is marked as required in MailChimp.', 'mailchimp-for-wp' ),
+            'interestCategories'    => __( 'Interest categories', 'mailchimp-for-wp' ),
 			'isFieldRequired' => __( "Is this field required?", 'mailchimp-for-wp' ),
 			'listChoice'    => __( 'List choice', 'mailchimp-for-wp' ),
 			'listChoiceDescription' => __( 'This field will allow your visitors to choose a list to subscribe to.', 'mailchimp-for-wp' ),
+            'listFields'    => __( 'List fields', 'mailchimp-for-wp' ),
 			'min'           => __( 'Min', 'mailchimp-for-wp' ),
 			'max'           => __( 'Max', 'mailchimp-for-wp' ),
 			'noAvailableFields' => __( 'No available fields. Did you select a MailChimp list in the form settings?', 'mailchimp-for-wp' ),
@@ -222,7 +225,7 @@ class MC4WP_Forms_Admin {
 
 		// strip tags from messages
 		foreach( $data['messages'] as $key => $message ) {
-			$data['messages'][$key] = strip_tags( $message, '<strong><b><br><a><script><u><em><i><span>' );
+			$data['messages'][$key] = strip_tags( $message, '<strong><b><br><a><script><u><em><i><span><img>' );
 		}
 
 		// make sure lists is an array
@@ -239,6 +242,7 @@ class MC4WP_Forms_Admin {
 		 * @param array $raw_data Raw array of form data.
 		 *
 		 * @since 3.0.8
+         * @ignore
 		 */
 		$data = (array) apply_filters( 'mc4wp_form_sanitized_data', $data, $raw_data );
 

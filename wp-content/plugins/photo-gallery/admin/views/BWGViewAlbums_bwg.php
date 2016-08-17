@@ -143,7 +143,7 @@ class BWGViewAlbums_bwg {
           if ($rows_data) {
             foreach ($rows_data as $row_data) {
               $alternate = (!isset($alternate) || $alternate == 'class="alternate"') ? '' : 'class="alternate"';
-              $published_image = (($row_data->published) ? 'publish-blue' : 'unpublish-blue');
+              $published_image = (($row_data->published) ? 'publish-blue' : 'unpublish-red');
               $published = (($row_data->published) ? 'unpublish' : 'publish');
               $unpublished = ((!$row_data->published) ? 'Unpublish' : 'Publish');
               if ($row_data->preview_image == '') {

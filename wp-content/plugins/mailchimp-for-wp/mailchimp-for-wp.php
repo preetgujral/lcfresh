@@ -3,7 +3,7 @@
 Plugin Name: MailChimp for WordPress
 Plugin URI: https://mc4wp.com/#utm_source=wp-plugin&utm_medium=mailchimp-for-wp&utm_campaign=plugins-page
 Description: MailChimp for WordPress by ibericode. Adds various highly effective sign-up methods to your site.
-Version: 3.1.11
+Version: 4.0.2
 Author: ibericode
 Author URI: https://ibericode.com/
 Text Domain: mailchimp-for-wp
@@ -47,7 +47,7 @@ function __mc4wp_load_plugin() {
 	}
 
 	// bootstrap the core plugin
-	define( 'MC4WP_VERSION', '3.1.11' );
+	define( 'MC4WP_VERSION', '4.0.2' );
 	define( 'MC4WP_PLUGIN_DIR', dirname( __FILE__ ) . '/' );
 	define( 'MC4WP_PLUGIN_URL', plugins_url( '/' , __FILE__ ) );
 	define( 'MC4WP_PLUGIN_FILE', __FILE__ );
@@ -62,7 +62,7 @@ function __mc4wp_load_plugin() {
 	 * @name $mc4wp
 	 */
 	$mc4wp = mc4wp();
-	$mc4wp['api'] = 'mc4wp_get_api';
+	$mc4wp['api'] = 'mc4wp_get_api_v3';
 	$mc4wp['request'] = array( 'MC4WP_Request', 'create_from_globals' );
 	$mc4wp['log'] = 'mc4wp_get_debug_log';
 
@@ -114,8 +114,9 @@ add_action( 'plugins_loaded', '__mc4wp_load_plugin', 20 );
  * @since 3.0
  */
 function __mc4wp_flush() {
-	delete_transient( 'mc4wp_mailchimp_lists' );
-	delete_transient( 'mc4wp_mailchimp_lists_fallback' );
+	delete_transient( 'mc4wp_mailchimp_lists_v3' );
+	delete_transient( 'mc4wp_mailchimp_lists_v3_fallback' );
+	delete_transient( 'mc4wp_list_counts' );
 }
 
 register_activation_hook( __FILE__, '__mc4wp_flush' );

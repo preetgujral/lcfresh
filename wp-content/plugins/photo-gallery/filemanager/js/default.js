@@ -65,6 +65,21 @@ jQuery(document).ready(function () {
   jQuery(document).keydown(function(e) {
     onKeyDown(e);
   });
+  jQuery("#search_by_name .search_by_name").on("input keyup", function() {
+    var search_by_name = jQuery(this).val().toLowerCase();
+    if (search_by_name) {
+      jQuery("#explorer_body .explorer_item").hide();
+      jQuery("#explorer_body .explorer_item").each(function () {
+        var filename = jQuery(this).attr("filename").toLowerCase();
+        if (filename.indexOf(search_by_name) != -1) {
+          jQuery(this).show();
+        }
+      });
+    }
+    else {
+      jQuery("#explorer_body .explorer_item").show();
+    }
+  });
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -559,9 +574,10 @@ function onBtnCancelClick(event, obj) {
 }
 
 function onBtnSelectAllClick() {
-  jQuery(".explorer_item").addClass("explorer_item_select");
+  jQuery(".explorer_item").removeClass("explorer_item_select");
+  jQuery(".explorer_item:visible").addClass("explorer_item_select");
   filesSelected = [];
-  jQuery(".explorer_item").each(function() {
+  jQuery(".explorer_item:visible").each(function() {
     var objName = jQuery(this).attr("name");
     if (filesSelected.indexOf(objName) == -1) {
       filesSelected.push(objName);

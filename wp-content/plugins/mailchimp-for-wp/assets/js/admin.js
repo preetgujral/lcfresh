@@ -74,19 +74,18 @@ helpers.debounce = function(func, wait, immediate) {
 	Array.prototype.forEach.call( showIfElements, function(element) {
 		var config = JSON.parse( element.getAttribute('data-showif') );
 		var parentElements = document.querySelectorAll('[name="'+ config.element +'"]');
-
 		var inputs = element.querySelectorAll('input,select,textarea:not([readonly])');
 		var hide = config.hide === undefined || config.hide;
 
 		function toggleElement() {
 
-			// do nothing with unchecked elements
-			if( typeof( this.checked ) === "boolean" && ! this.checked ) {
+			// do nothing with unchecked radio inputs
+			if( this.getAttribute('type') === "radio" && ! this.checked ) {
 				return;
 			}
 
-			// check if element value matches expected value
-			var conditionMet = ( this.value == config.value );
+			var value = ( this.getAttribute("type")  === "checkbox" ) ? this.checked : this.value;
+			var conditionMet = ( value == config.value );
 
 			if( hide ) {
 				element.style.display = conditionMet ? '' : 'none';
@@ -97,7 +96,7 @@ helpers.debounce = function(func, wait, immediate) {
 
 			// disable input fields to stop sending their values to server
 			Array.prototype.forEach.call( inputs, function(inputElement) {
-				conditionMet ?  inputElement.removeAttribute('readonly') : inputElement.setAttribute('readonly','readonly');
+				conditionMet ? inputElement.removeAttribute('readonly') : inputElement.setAttribute('readonly','readonly');
 			});
 		}
 
@@ -179,14 +178,16 @@ var Settings = function(context, helpers, events ) {
 
 module.exports = Settings;
 },{}],4:[function(require,module,exports){
+'use strict';
+
+var URL = require('./url.js');
+
 // Tabs
 var Tabs = function(context) {
-	'use strict';
 
 	// @todo last piece of jQuery... can we get rid of it?
 	var $ = window.jQuery;
 
-	var URL = require('./url.js');
 	var $context = $(context);
 	var $tabs = $context.find('.tab');
 	var $tabNavs = $context.find('.nav-tab');

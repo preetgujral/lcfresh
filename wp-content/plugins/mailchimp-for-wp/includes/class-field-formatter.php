@@ -53,11 +53,13 @@ class MC4WP_Field_Formatter {
 			if( isset( $value['month'] ) && isset( $value['day'] ) ) {
 				$value = $value['month'] . '/' . $value['day'];
 			} else {
-
 				// if other array, just join together
 				$value = join( '/', $value );
 			}
 		}
+
+		// always use slashes as delimiter, so next part works
+        $value = str_replace( array( '.', '-' ), '/', $value );
 
 		// if first part looks like a day, flip order so month (or even year) comes first
 		// this allows `strtotime` to understand `dd/mm` values
@@ -91,4 +93,41 @@ class MC4WP_Field_Formatter {
 
 		return (string) date('Y-m-d', strtotime( $value ) );
 	}
+
+    /**
+     * @param string $value
+     *
+     * @return string
+     */
+	public function language( $value ) {
+	    $value = trim( $value );
+
+	    $exceptions = array(
+            'pt_PT',
+            'es_ES',
+            'fr_CA',
+        );
+
+        if( ! in_array( $value, $exceptions ) ) {
+            $value = substr( $value, 0, 2 );
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return bool
+     */
+    public function boolean( $value ) {
+        $falsey = array( 'false', '0' );
+
+        if( in_array( $value, $falsey, true ) ) {
+            return false;
+        }
+
+        // otherwise, just cast.
+        return (bool) $value;
+    }
 }

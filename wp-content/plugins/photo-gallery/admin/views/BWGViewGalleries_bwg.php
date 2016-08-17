@@ -67,7 +67,7 @@ class BWGViewGalleries_bwg {
           <span style="vertical-align: middle;"><?php echo __('Select All', 'bwg_back'); ?></span>
         </span>
         <select class='select_icon bulk_action'>
-         <option value=""><?php echo __("Bulk Actions"); ?></option>
+          <option value=""><?php _e('Bulk Actions', 'bwg_back'); ?></option>
         <?php 
         foreach($gallery_button_array as $key => $value) {
         ?>
@@ -78,8 +78,8 @@ class BWGViewGalleries_bwg {
         }
         ?>
         </select>
-        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-apply" type="button" title="<?php echo __("Apply","bwg_back"); ?>" onclick="if (!bwg_bulk_actions('.bulk_action', 'gallery_page')) {return false;}" value="<?php echo __("Apply","bwg_back"); ?>" />
-      <?php WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'galleries_form', $per_page); ?>
+        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-apply" type="button" title="<?php _e("Apply","bwg_back"); ?>" onclick="if (!bwg_bulk_actions('.bulk_action', 'gallery_page')) {return false;}" value="<?php _e("Apply","bwg_back"); ?>" />
+        <?php WDWLibrary::html_page_nav($page_nav['total'], $pager++, $page_nav['limit'], 'galleries_form', $per_page); ?>
       </div>
       <table class="wp-list-table widefat fixed pages">
         <thead>
@@ -144,7 +144,7 @@ class BWGViewGalleries_bwg {
           if ($rows_data) {
             foreach ($rows_data as $row_data) {
               $alternate = (!isset($alternate) || $alternate == 'class="alternate"') ? '' : 'class="alternate"';
-              $published_image = (($row_data->published) ? 'publish-blue' : 'unpublish-blue');
+              $published_image = (($row_data->published) ? 'publish-blue' : 'unpublish-red');
               $published = (($row_data->published) ? 'unpublish' : 'publish');
               $unpublish = ((!$row_data->published) ? 'Unpublish' : 'Publish');
 							$images_count = $this->model->get_images_count($row_data->id);
@@ -303,7 +303,6 @@ class BWGViewGalleries_bwg {
           $query_url = wp_nonce_url( admin_url('admin-ajax.php'), 'editThumb', 'bwg_nonce' );
           ?>
           a_thumb.setAttribute('href', "<?php echo add_query_arg(array('action' => 'editThumb', 'type' => 'display'/*thumb_display*/, 'width' => '650', 'height' => '500'), $query_url); ?>&image_id=" + bwg_j + "&TB_iframe=1");
-  
           a_thumb.setAttribute('title', files[i]['name']);
           td_thumb.appendChild(a_thumb);
           var img_thumb = document.createElement('img');
@@ -363,7 +362,7 @@ class BWGViewGalleries_bwg {
             var a_crop = document.createElement('a');
             a_crop.setAttribute('class', "thickbox thickbox-preview");
             a_crop.setAttribute('onclick', "spider_set_href(this, '" + bwg_j + "', 'crop');");
-            a_crop.innerHTML = "<?php _e("Crop", 'bwg_back'); ?>";
+            a_crop.innerHTML = "<?php _e('Crop', 'bwg_back'); ?>";
             span_edit_crop.appendChild(a_crop);
             div_edit.innerHTML += " | ";
             var span_edit_rotate = document.createElement('span');
@@ -372,7 +371,7 @@ class BWGViewGalleries_bwg {
             var a_rotate = document.createElement('a');
             a_rotate.setAttribute('class', "thickbox thickbox-preview");
             a_rotate.setAttribute('onclick', "spider_set_href(this, '" + bwg_j + "', 'rotate');");
-            a_rotate.innerHTML = "<?php _e("Edit", 'bwg_back'); ?>";
+            a_rotate.innerHTML = "<?php _e('Edit', 'bwg_back'); ?>";
             span_edit_rotate.appendChild(a_rotate);
             div_edit.innerHTML += " | "
             var span_edit_recover = document.createElement('span');
@@ -380,7 +379,7 @@ class BWGViewGalleries_bwg {
             div_edit.appendChild(span_edit_recover);
             var a_recover = document.createElement('a');
             a_recover.setAttribute('onclick', 'if (confirm("<?php echo addslashes(__("Do you want to reset the image?", 'bwg_back')); ?>")) { spider_set_input_value("ajax_task", "recover"); spider_set_input_value("image_current_id", "' + bwg_j + '"); spider_ajax_save("galleries_form");} return false;');
-            a_recover.innerHTML = "<?php _e("Reset", 'bwg_back'); ?>";
+            a_recover.innerHTML = "<?php _e('Reset', 'bwg_back'); ?>";
             span_edit_recover.appendChild(a_recover);
           }
           var input_image_url = document.createElement('input');
@@ -480,6 +479,7 @@ class BWGViewGalleries_bwg {
           tr.appendChild(td_tag);
           var a_tag = document.createElement('a');
           a_tag.setAttribute('class', "button-small wd-btn wd-btn-primary wd-not-image thickbox thickbox-preview");
+          a_tag.setAttribute('title' , "<?php _e("Add tag", 'bwg_back'); ?>");
           <?php 
           $query_url = wp_nonce_url( admin_url('admin-ajax.php'), 'addTags', 'bwg_nonce' );
           ?>
@@ -706,9 +706,9 @@ class BWGViewGalleries_bwg {
     $page_number = (isset($_POST['page_number']) ? esc_html(stripslashes($_POST['page_number'])) : 1);
     $ids_string = '';
     $per_page = $this->model->per_page();
+    $pager = 0;
     $gallery_row = $this->model->get_row_data($id);
     $gallery_type = ($gallery_row->gallery_type == 'instagram' || $gallery_row->gallery_type == 'instagram_post') ? 'instagram' : '';
-    $pager = 0;
     $image_array = array(
       'image_set_watermark' => __('Set Watermark', 'bwg_back'),
       'image_get_resize' => __('Resize', 'bwg_back'),
@@ -716,74 +716,72 @@ class BWGViewGalleries_bwg {
       'image_recover_all' => __('Reset', 'bwg_back'),
       'image_publish_all' => __('Publish', 'bwg_back'),
       'image_unpublish_all' => __('Unpublish', 'bwg_back'),
-      'image_delete_all' => __('Delete', 'bwg_back')
+      'image_desc' => __('Edit', 'bwg_back'),
+      'image_delete_all' => __('Delete', 'bwg_back'),
     );
     ?>
-      <!--<div id="draganddrop" class="wd_updated" style="display:none;"><strong><p><?php _e("Changes made in this table should be saved.", 'bwg_back'); ?></p></strong></div>-->
-      <div class="buttons_div_left">
-        <?php
+    <div class="buttons_div_left">
+      <?php
         $query_url = add_query_arg(array('action' => 'addImages', 'width' => '700', 'height' => '550', 'extensions' => 'jpg,jpeg,png,gif', 'callback' => 'bwg_add_image'), admin_url('admin-ajax.php'));
-        $query_url = wp_nonce_url( $query_url, 'addImages', 'bwg_nonce' );
-        $query_url = add_query_arg(array( 'TB_iframe' => '1'), $query_url);
-        ?>
-        <a href="<?php echo  $query_url;  ?>" id="add_image_bwg" class="wd-btn wd-btn-primary wd-btn-icon wd-btn-add thickbox thickbox-preview" id="content-add_media" title="<?php _e("Add Images", 'bwg_back'); ?>" onclick="return false;" style="margin-bottom:5px; <?php if($gallery_type !='') {echo 'display:none';} ?>" >
-          <?php _e("Add Images", 'bwg_back'); ?>
-        </a>
-        <?php
-        $query_url = wp_nonce_url( admin_url('admin-ajax.php'), '', 'bwg_nonce' );
-        /*(re?)define ajax_url to add nonce only in admin*/
-        ?>
-        <script>
-          var ajax_url = "<?php echo $query_url; ?>"
-        </script>
+      $query_url = wp_nonce_url($query_url, 'addImages', 'bwg_nonce');
+      $query_url = add_query_arg(array('TB_iframe' => '1'), $query_url);
+      ?>
+      <a href="<?php echo  $query_url;  ?>" id="add_image_bwg" class="wd-btn wd-btn-primary wd-btn-icon wd-btn-add thickbox thickbox-preview" id="content-add_media" title="<?php _e("Add Images", 'bwg_back'); ?>" onclick="return false;" style="margin-bottom:5px; <?php if($gallery_type !='') {echo 'display:none';} ?>" >
+        <?php _e('Add Images', 'bwg_back'); ?>
+      </a>
+      <?php
+      $query_url = wp_nonce_url(admin_url('admin-ajax.php'), '', 'bwg_nonce');
+      /*(re?)define ajax_url to add nonce only in admin*/
+      ?>
+      <script>
+        var ajax_url = "<?php echo $query_url; ?>"
+      </script>
         <input id="show_add_embed" class="wd-btn wd-btn-primary wd-btn-icon wd-btn-media"  type="button" title="<?php _e("Embed Media", 'bwg_back'); ?>" onclick="jQuery('.opacity_add_embed').show(); jQuery('#add_embed_help').hide(); return false;" value="<?php _e("Embed Media", 'bwg_back'); ?>" />
         <input id="show_bulk_embed" class="wd-btn wd-btn-primary wd-btn-icon wd-btn-bulk_media spider_free_version_button" type="button" title="<?php _e("Social Bulk Embed", 'bwg_back'); ?>" onclick="jQuery('.opacity_bulk_embed').show(); return false;" value="<?php _e("Social Bulk Embed", 'bwg_back'); ?>" />
-        <?php WDWLibrary::ajax_search(__("Filename", 'bwg_back'), $search_value, 'galleries_form');?>
-     </div>
+        <?php WDWLibrary::ajax_search(__('Filename', 'bwg_back'), $search_value, 'galleries_form'); ?>
+    </div>
     <div class="tablenav top buttons_div_left bwg_buttons_div">
-        <span class="wd-btn wd-btn-primary-gray bwg_check_all  non_selectable " onclick="spider_check_all_items()">
-          <input type="checkbox" id="check_all_items" name="check_all_items" onclick="spider_check_all_items_checkbox()" style="margin: 0; vertical-align: middle;" />
-          <span style="vertical-align: middle;"><?php echo __('Select All', 'bwg_back'); ?></span>
-        </span>
-        <select class='select_icon bulk_action_img' <?php if($gallery_type !='') {echo 'display:none';} ?>" >
-         <option value=""><?php echo __("Bulk Actions"); ?></option>
+      <span class="wd-btn wd-btn-primary-gray bwg_check_all  non_selectable " onclick="spider_check_all_items()">
+        <input type="checkbox" id="check_all_items" name="check_all_items" onclick="spider_check_all_items_checkbox()" style="margin: 0; vertical-align: middle;" />
+        <span style="vertical-align: middle;"><?php echo __('Select All', 'bwg_back'); ?></span>
+      </span>
+      <select class="select_icon bulk_action_img">
+        <option value=""><?php _e('Bulk Actions', 'bwg_back'); ?></option>
         <?php 
-        foreach($image_array as $key => $value) {
-        ?>
-          <option value="<?php echo $key;?>">
-            <?php echo $value;?>
-          </option>
-        <?php
+        foreach ($image_array as $key => $value) {
+          ?>
+        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+          <?php
         }
         ?>
-        </select>
-        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-apply" type="button" title="<?php echo __("Apply","bwg_back"); ?>" onclick="if (!bwg_bulk_actions('.bulk_action_img', '')) {return false;}" value="<?php echo __("Apply","bwg_back"); ?>" />
-       <?php WDWLibrary::ajax_html_page_nav($page_nav['total'], $page_nav['limit'], 'galleries_form', $per_page, $pager++); ?>
-      </div>
-      <div class="opacity_resize_image opacity_add_embed opacity_bulk_embed bwg_opacity_media" onclick="jQuery('.opacity_add_embed').hide(); jQuery('.opacity_bulk_embed').hide(); jQuery('.opacity_resize_image').hide();"></div>
+      </select>
+      <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-apply" type="button" title="<?php _e("Apply", "bwg_back"); ?>" onclick="if (!bwg_bulk_actions('.bulk_action_img', '')) {return false;}" value="<?php _e("Apply", "bwg_back"); ?>" />
+      <?php WDWLibrary::ajax_html_page_nav($page_nav['total'], $page_nav['limit'], 'galleries_form', $per_page, $pager++); ?>
+    </div>
+    <div class="opacity_resize_image opacity_add_embed opacity_image_desc opacity_bulk_embed bwg_opacity_media" onclick="jQuery('.opacity_add_embed').hide(); jQuery('.opacity_bulk_embed').hide(); jQuery('.opacity_resize_image').hide(); jQuery('.opacity_image_desc').hide();"></div>       
       <div id="add_embed" class="opacity_add_embed bwg_add_embed">
         <input type="text" id="embed_url" name="embed_url" value="" />
-        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-add" type="button" onclick="if (bwg_get_embed_info('embed_url')) {jQuery('.opacity_add_embed').hide();} return false;" value="<?php _e("Add to gallery", 'bwg_back'); ?>" />
-        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-cancel" type="button" onclick="jQuery('.opacity_add_embed').hide(); return false;" value="<?php _e("Cancel", 'bwg_back'); ?>" />
+        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-add" type="button" onclick="if (bwg_get_embed_info('embed_url')) {jQuery('.opacity_add_embed').hide();} return false;" value="<?php _e('Add to gallery', 'bwg_back'); ?>" />
+        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-cancel" type="button" onclick="jQuery('.opacity_add_embed').hide(); return false;" value="<?php _e('Cancel', 'bwg_back'); ?>" />
         <div class="spider_description">
-        <p><?php _e("Enter YouTube, Vimeo, Instagram, Flickr or Dailymotion URL here.", 'bwg_back'); ?> <a onclick="jQuery('#add_embed_help').show();" style='text-decoration: underline; color:blue; cursor: pointer;'><?php _e("Help", 'bwg_back'); ?></a></p>
+        <p><?php _e('Enter YouTube, Vimeo, Instagram, Flickr or Dailymotion URL here.', 'bwg_back'); ?> <a onclick="jQuery('#add_embed_help').show();" style='text-decoration: underline; color:blue; cursor: pointer;'><?php _e('Help', 'bwg_back'); ?></a></p>
         </div>
-        <div id='add_embed_help' class= "opacity_add_embed bwg_add_embed" style="display:none;">
-          <p style="text-align:right; margin-top:0px;"><a onclick="jQuery('#add_embed_help').hide();" style="text-decoration: underline; color:blue; cursor: pointer; "><?php _e("Close", 'bwg_back'); ?></a></p>
-          <p><b>Youtube</b> URL <?php _e("example:", 'bwg_back'); ?> <i style="">https://www.youtube.com/watch?v=fa4RLjE-yM8</i></p>
-          <p><b>Vimeo</b> URL <?php _e("example:", 'bwg_back'); ?> <i style="">http://vimeo.com/8110647</i></p>
-          <p><b>Instagram</b> URL <?php _e("example:", 'bwg_back'); ?> <i style="">http://instagram.com/p/ykvv0puS4u</i>. <?php _e("Add", 'bwg_back'); ?> "<i style="text-decoration:underline;"><?php _e("post", 'bwg_back'); ?></i>" <?php _e("to the end of URL if you want to embed the whole Instagram post, not only its content.", 'bwg_back'); ?></p>
-          <p><b>Flickr</b> URL <?php _e("example:", 'bwg_back'); ?> <i style="">https://www.flickr.com/photos/sui-fong/15250186998/in/gallery-flickr-72157648726328108/</i></p>
-          <p><b>Dailymotion</b> URL <?php _e("example:", 'bwg_back'); ?> <i style="">http://www.dailymotion.com/video/xexaq0_frank-sinatra-strangers-in-the-nigh_music</i></p>
+        <div id="add_embed_help" class="opacity_add_embed bwg_add_embed" style="display: none;">
+          <p style="text-align:right; margin-top:0px;"><a onclick="jQuery('#add_embed_help').hide();" style="text-decoration: underline; color:blue; cursor: pointer; "><?php _e('Close', 'bwg_back'); ?></a></p>
+          <p><b>Youtube</b> <?php _e('URL example:', 'bwg_back'); ?> <i>https://www.youtube.com/watch?v=fa4RLjE-yM8</i></p>
+          <p><b>Vimeo</b> <?php _e('URL example:', 'bwg_back'); ?> <i>http://vimeo.com/8110647</i></p>
+          <p><b>Instagram</b> <?php _e('URL example:', 'bwg_back'); ?> <i>http://instagram.com/p/ykvv0puS4u</i>. <?php _e('Add', 'bwg_back'); ?> "<i style="text-decoration:underline;"><?php _e('post', 'bwg_back'); ?></i>" <?php _e('to the end of URL if you want to embed the whole Instagram post, not only its content.', 'bwg_back'); ?></p>
+          <p><b>Flickr</b> <?php _e('URL example:', 'bwg_back'); ?> <i>https://www.flickr.com/photos/sui-fong/15250186998/in/gallery-flickr-72157648726328108/</i></p>
+          <p><b>Dailymotion</b> <?php _e('URL example:', 'bwg_back'); ?> <i>http://www.dailymotion.com/video/xexaq0_frank-sinatra-strangers-in-the-nigh_music</i></p>
         </div>
       </div>
       <div id="bulk_embed" class="opacity_bulk_embed bwg_bulk_embed">
-        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-cancel" type="button" onclick="jQuery('.opacity_bulk_embed').hide(); jQuery('#opacity_div').hide(); jQuery('#loading_div').hide(); return false;" value="<?php _e("Cancel", 'bwg_back'); ?>" style="float:right; margin-left:5px;"/>
-        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-add spider_free_version_button" type="button" value="<?php _e("Add to gallery", 'bwg_back'); ?>" style="float:right; margin-left:5px;"/>
+        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-cancel" type="button" onclick="jQuery('.opacity_bulk_embed').hide(); jQuery('#opacity_div').hide(); jQuery('#loading_div').hide(); return false;" value="<?php _e('Cancel', 'bwg_back'); ?>" style="float: right; margin-left: 5px;" />
+        <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-add spider_free_version_button" type="button" value="<?php _e('Add to gallery', 'bwg_back'); ?>" style="float:right; margin-left:5px;"/>
         <div class="spider_description"></div>
-       <table class="spider_free_version ">
-         <thead>
-           <tr>
+        <table class="spider_free_version ">
+          <thead>
+            <tr>
               <td class="spider_label_galleries"><label for="bulk_embed_from" class="spider_free_version_label_color"><?php _e("Bulk embed from:", 'bwg_back'); ?> </label></td>
               <td>
                 <input type="radio" disabled="disabled" class="inputbox" id="bulk_embed_from_instagram" onclick="jQuery('#instagram_bulk_params').show();" checked="checked" value="<?php _e("instagram", 'bwg_back'); ?>" >
@@ -808,26 +806,50 @@ class BWGViewGalleries_bwg {
                 <input type="radio" disabled="disabled" class="inputbox" id="popup_instagram_post_gallery_1" value="1" >
                 <label for="popup_instagram_post_gallery_1" class="spider_free_version_label_color"><?php _e("Whole post", 'bwg_back'); ?></label>
               </td>
-            <tr>
-         </tbody>
+            </tr>
+          </tbody>
        </table>
       </div>
-      <div id="" class="opacity_resize_image bwg_resize_image">
+      <div class="opacity_resize_image bwg_resize_image">
         <?php _e("Resize images to: ", 'bwg_back'); ?>
         <input type="text" name="image_width" id="image_width" value="1600" /> x 
         <input type="text" name="image_height" id="image_height" value="1200" /> px
         <input class="wd-btn wd-btn-primary wd-not-image" type="button" onclick="spider_set_input_value('ajax_task', 'image_resize');
-                                                             spider_ajax_save('galleries_form');
-                                                             jQuery('.opacity_resize_image').hide();
-                                                             return false;" value="<?php _e("Resize", 'bwg_back'); ?>" />
+                                                                                 spider_ajax_save('galleries_form');
+                                                                                 jQuery('.opacity_resize_image').hide();
+                                                                                 return false;" value="<?php _e("Resize", 'bwg_back'); ?>" />
         <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-cancel" type="button" onclick="jQuery('.opacity_resize_image').hide(); return false;" value="<?php _e("Cancel", 'bwg_back'); ?>" />
         <div class="spider_description"><?php _e("The maximum size of resized image.", 'bwg_back'); ?></div>
       </div>
-       <div id="draganddrop" class="wd_updated" style="display:none;"><strong><p><?php echo __('Changes made in this table should be saved.', 'bwg_back'); ?></p></strong></div>
+      <div id="add_desc" class="opacity_image_desc bwg_image_desc">
+        <div>
+          <span class="bwg_popup_label">
+            <?php _e('Alt/Title: ', 'bwg_back'); ?>
+          </span>
+          <input class="bwg_popup_input" type="text" id="title" name="title" value="" />
+          <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-add" type="button" onclick="if (window.parent.bwg_add_title_desc()) {jQuery('.opacity_image_desc').hide();} return false;" value="<?php echo __('Update', 'bwg_back'); ?>" />
+          <input class="wd-btn wd-btn-primary wd-btn-icon wd-btn-cancel" type="button" onclick="jQuery('.opacity_image_desc').hide(); return false;" value="<?php echo __('Cancel', 'bwg_back'); ?>" />
+        </div>
+        <?php if ($option_row->thumb_click_action != 'open_lightbox') { ?>
+        <div>
+          <span class="bwg_popup_label">
+            <?php _e('Redirect URL: ', 'bwg_back'); ?>
+          </span>
+          <input class="bwg_popup_input" type="text" id="redirecturl" name="redirecturl" value="" />
+        </div>
+        <?php } ?>
+        <div>
+          <span class="bwg_popup_label">
+            <?php _e('Description: ', 'bwg_back'); ?>
+          </span>
+          <textarea class="bwg_popup_input" type="text" id="desc" name="desc"></textarea>
+        </div>
+      </div>
+      <div id="draganddrop" class="wd_updated" style="display:none;"><strong><p><?php _e('Changes made in this table should be saved.', 'bwg_back'); ?></p></strong></div>
       <table id="images_table" class="wp-list-table widefat fixed pages">
         <thead>
          <th class="check-column table_small_col table_medium_col manage-column column-title sorted asc" style="margin: 0px auto 0px 15px; width: 60px; vertical-align: middle;">
-            <a id="show_hide_weights" class="bwg_order_column" title="<?php echo __('Hide order column', 'bwg_back'); ?>" onclick="spider_show_hide_weights();return false;" value="<?php echo __('Hide order column', 'bwg_back'); ?>"></a>
+            <a id="show_hide_weights" class="bwg_order_column" title="<?php _e('Hide order column', 'bwg_back'); ?>" onclick="spider_show_hide_weights();return false;" value="<?php _e('Hide order column', 'bwg_back'); ?>"></a>
             <a id="th_order" onclick="spider_set_input_value('task', '');
                         spider_set_input_value('image_order_by', 'order');
                         spider_set_input_value('image_asc_or_desc', 'desc');
@@ -839,13 +861,13 @@ class BWGViewGalleries_bwg {
           
           </th>
           <th class="table_small_col">#</th>
-          <th class="table_extra_large_col"><?php echo __('Thumbnail', 'bwg_back'); ?></th>
+          <th class="table_extra_large_col"><?php _e('Thumbnail', 'bwg_back'); ?></th>
           <th class="sortable table_extra_large_col <?php if ($image_order_by == 'filename') {echo $order_class;} ?>">
             <a onclick="spider_set_input_value('task', '');
                         spider_set_input_value('image_order_by', 'filename');
                         spider_set_input_value('image_asc_or_desc', '<?php echo ($image_order_by == 'filename' && $image_asc_or_desc == 'asc') ? 'desc' : 'asc'; ?>');
                         spider_ajax_save('galleries_form');">
-              <span><?php echo __('Filename', 'bwg_back'); ?></span><span class="sorting-indicator"></span>
+              <span><?php _e('Filename', 'bwg_back'); ?></span><span class="sorting-indicator"></span>
             </a>
           </th>
           <th class="sortable table_extra_large_col <?php if ($image_order_by == 'alt') {echo $order_class;} ?>">
@@ -853,7 +875,7 @@ class BWGViewGalleries_bwg {
                         spider_set_input_value('image_order_by', 'alt');
                         spider_set_input_value('image_asc_or_desc', '<?php echo ($image_order_by == 'alt' && $image_asc_or_desc == 'asc') ? 'desc' : 'asc'; ?>');
                         spider_ajax_save('galleries_form');">
-              <span><?php echo __('Alt/Title', 'bwg_back'); ?><?php if ($option_row->thumb_click_action != 'open_lightbox') { ?><br /><?php echo __('Redirect', 'bwg_back'); ?> URL<?php } ?></span><span class="sorting-indicator"></span>
+              <span><?php _e('Alt/Title', 'bwg_back'); ?><?php if ($option_row->thumb_click_action != 'open_lightbox') { ?><br /><?php echo __('Redirect', 'bwg_back'); ?> URL<?php } ?></span><span class="sorting-indicator"></span>
             </a>
           </th>
           <th class="sortable table_extra_large_col <?php if ($image_order_by == 'description') {echo $order_class;} ?>">
@@ -861,7 +883,7 @@ class BWGViewGalleries_bwg {
                         spider_set_input_value('image_order_by', 'description');
                         spider_set_input_value('image_asc_or_desc', '<?php echo ($image_order_by == 'description' && $image_asc_or_desc == 'asc') ? 'desc' : 'asc'; ?>');
                         spider_ajax_save('galleries_form');">
-              <span><?php echo __('Description', 'bwg_back'); ?></span><span class="sorting-indicator"></span>
+              <span><?php _e('Description', 'bwg_back'); ?></span><span class="sorting-indicator"></span>
             </a>
           </th>
           <?php 
@@ -876,7 +898,7 @@ class BWGViewGalleries_bwg {
                         spider_set_input_value('image_order_by', 'published');
                         spider_set_input_value('image_asc_or_desc', '<?php echo ($image_order_by == 'published' && $image_asc_or_desc == 'asc') ? 'desc' : 'asc'; ?>');
                         spider_ajax_save('galleries_form');">
-              <span><?php echo __('Published', 'bwg_back'); ?></span><span class="sorting-indicator"></span>
+              <span><?php _e('Published', 'bwg_back'); ?></span><span class="sorting-indicator"></span>
             </a>
           </th>
           <th class="table_small_col"><?php echo __('Delete', 'bwg_back'); ?></th>
@@ -889,7 +911,7 @@ class BWGViewGalleries_bwg {
               $is_embed = preg_match('/EMBED/',$row_data->filetype)==1 ? true :false;
               $alternate = (!isset($alternate) || $alternate == 'class="alternate"') ? '' : 'class="alternate"';
               $rows_tag_data = $this->model->get_tag_rows_data($row_data->id);
-              $published_image = (($row_data->published) ? 'publish-blue' : 'unpublish-blue');
+              $published_image = (($row_data->published) ? 'publish-blue' : 'unpublish-red');
               $published = (($row_data->published) ? 'unpublish' : 'publish');
               $unpublish = ((!$row_data->published) ? 'Unpublish' : 'Publish');
               ?>
@@ -899,7 +921,7 @@ class BWGViewGalleries_bwg {
                 <td class="table_small_col check-column"><input id="check_<?php echo $row_data->id; ?>" name="check_<?php echo $row_data->id; ?>" onclick="spider_check_all(this)" type="checkbox" /></td>
                 <td class="table_small_col"><?php echo ++$i; ?></td>
                 <td class="table_extra_large_col">
-                  <?php
+                <?php
                 $is_embed_instagram_post = preg_match('/INSTAGRAM_POST/', $row_data->filetype) == 1 ? true :false;
                 $instagram_post_width = 0;
                 $instagram_post_height = 0;
@@ -911,12 +933,11 @@ class BWGViewGalleries_bwg {
                     $instagram_post_height = $instagram_post_height[0];
                   }
                 }
-                
-                  $query_url = add_query_arg(array('action' => 'editThumb', 'type' => 'display'/*thumb_display*/, 'image_id' => $row_data->id, 'width' => '800', 'height' => '500', 'instagram_post_width' => $instagram_post_width, 'instagram_post_height' => $instagram_post_height), admin_url('admin-ajax.php'));
-                  $query_url = wp_nonce_url( $query_url, 'editThumb', 'bwg_nonce' );
-                  $query_url = add_query_arg(array('TB_iframe' => '1'), $query_url);
+                $query_url = add_query_arg(array('action' => 'editThumb', 'type' => 'display'/*thumb_display*/, 'image_id' => $row_data->id, 'width' => '800', 'height' => '500', 'instagram_post_width' => $instagram_post_width, 'instagram_post_height' => $instagram_post_height), admin_url('admin-ajax.php'));
+                $query_url = wp_nonce_url( $query_url, 'editThumb', 'bwg_nonce' );
+                $query_url = add_query_arg(array('TB_iframe' => '1'), $query_url);
                 $is_embed_instagram_post = preg_match('/INSTAGRAM_POST/',$row_data->filetype) == 1 ? true : false;
-                  ?>
+                ?>
                   <a class="thickbox thickbox-preview" title="<?php echo $row_data->alt; ?>" href="<?php echo $query_url; ?>">
                     <img id="image_thumb_<?php echo $row_data->id; ?>" class="thumb" src="<?php echo (!$is_embed ? site_url() . '/' . $WD_BWG_UPLOAD_DIR : "") . $row_data->thumb_url . ($is_embed ? '' : '?date=' . date('Y-m-y H:i:s')); ?>" />
                   </a>
@@ -930,7 +951,7 @@ class BWGViewGalleries_bwg {
                   <div class="fileDescription" title="<?php _e("Image size", 'bwg_back'); ?>" id="filesize_<?php echo $row_data->id; ?>"><?php echo $row_data->size; ?></div>
                   <div class="fileDescription" title="<?php _e("Type", 'bwg_back'); ?>" id="filetype_<?php echo $row_data->id; ?>"><?php echo $row_data->filetype; ?></div>
                   <?php
-                   if (!$is_embed) {
+                  if (!$is_embed) {
                     ?>
                   <div> 
                     <?php
@@ -945,12 +966,12 @@ class BWGViewGalleries_bwg {
                     $query_url = add_query_arg(array('TB_iframe' => '1'), $query_url);
                     ?>
                     <span class="edit_thumb"><a class="thickbox thickbox-preview" href="<?php echo $query_url; ?>"><?php _e("Edit", 'bwg_back'); ?></a></span> | 
-                    <span class="edit_thumb"><a onclick="if (confirm('<?php echo addslashes(__("Do you want to reset the image?", 'bwg_back')); ?>')) {
+                    <span class="edit_thumb"><a onclick="if (confirm('<?php echo addslashes(__('Do you want to reset the image?', 'bwg_back')); ?>')) {
                                                           spider_set_input_value('ajax_task', 'recover');
                                                           spider_set_input_value('image_current_id', '<?php echo $row_data->id; ?>');
                                                           spider_ajax_save('galleries_form');
                                                          }
-                                                         return false;"><?php _e("Reset", 'bwg_back'); ?></a></span>
+                                                         return false;"><?php _e('Reset', 'bwg_back'); ?></a></span>
                   </div>
                   <?php } ?>
                   <input type="hidden" id="image_url_<?php echo $row_data->id; ?>" name="image_url_<?php echo $row_data->id; ?>" value="<?php echo $row_data->image_url; ?>" />
@@ -975,7 +996,7 @@ class BWGViewGalleries_bwg {
                   $query_url = wp_nonce_url( admin_url('admin-ajax.php'), 'addTags', 'bwg_nonce' );
                   $query_url = add_query_arg(array('action' => 'addTags', 'image_id' => $row_data->id, 'width' => '650', 'height' => '500', 'bwg_items_per_page' => $per_page, 'TB_iframe' => '1'), $query_url);
                   ?>
-                  <a href="<?php echo $query_url; ?>" class="button-small wd-btn wd-btn-primary wd-not-image thickbox thickbox-preview"><?php _e("Add tag", 'bwg_back'); ?></a>
+                  <a href="<?php echo $query_url; ?>" title="<?php _e('Add tag', 'bwg_back'); ?>" class="button-small wd-btn wd-btn-primary wd-not-image thickbox thickbox-preview"><?php _e('Add tag', 'bwg_back'); ?></a>
                   <div class="tags_div" id="tags_div_<?php echo $row_data->id; ?>">
                   <?php
                   $tags_id_string = '';
@@ -1017,6 +1038,7 @@ class BWGViewGalleries_bwg {
           <input id="ajax_task" name="ajax_task" type="hidden" value="" />
           <input id="image_current_id" name="image_current_id" type="hidden" value="" />
           <input id="added_tags_select_all" name="added_tags_select_all" type="hidden" value="" />
+          <input type="hidden" id="bulk_edit" name="bulk_edit" value="0" />
         </tbody>
       </table>
       <div class="tablenav bottom">
@@ -1029,7 +1051,7 @@ class BWGViewGalleries_bwg {
       </script>
     <?php
   }
-  
+
   ////////////////////////////////////////////////////////////////////////////////////////
   // Getters & Setters                                                                  //
   ////////////////////////////////////////////////////////////////////////////////////////

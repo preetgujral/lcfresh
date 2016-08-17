@@ -2,7 +2,8 @@
   border: none !important;
   margin-top: 200px;
   width: 30px;
-  /*-webkit-animation: spin 2.5s infinite linear;
+  /*border: none !important;
+  -webkit-animation: spin 2.5s infinite linear;
   -moz-animation: spin 2.5s infinite linear;
   -o-animation: spin 2.5s infinite linear;
   animation: spin 2.5s infinite linear;*/
@@ -610,6 +611,11 @@ a.wd-btn-primary:hover, a.wd-btn-primary:active, a.wd-btn-primary:link{
 	background-repeat: no-repeat;
 	background-position: 10% 50%;
 }
+.wd-btn-icon-add {
+  padding: 0px 10px 1px 42px !important;
+	background-repeat: no-repeat;
+	background-position: 10% 50%;
+}
 .wd-btn-uplaod{
 	background-image:url(../images/btn_icons/upload.png);
 }
@@ -621,11 +627,6 @@ a.wd-btn-primary:hover, a.wd-btn-primary:active, a.wd-btn-primary:link{
 }
 .wd-btn-cancel{
 	background-image:url(../images/icons/cancel.png);
-}
-.wd-btn-icon-add {
-  padding: 0px 10px 1px 42px !important;
-	background-repeat: no-repeat;
-	background-position: 10% 50%;
 }
 .wd-not-image{
   padding: 0px 10px 1px 10px !important;

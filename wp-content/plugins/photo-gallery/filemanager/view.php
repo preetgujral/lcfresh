@@ -83,17 +83,6 @@ class FilemanagerView {
         var callback = "<?php echo (isset($_REQUEST['callback']) ? esc_html($_REQUEST['callback']) : ''); ?>";
         var sortBy = "<?php echo $sort_by; ?>";
         var sortOrder = "<?php echo $sort_order; ?>";
-        jQuery(document).ready(function () {
-          jQuery("#search_by_name .search_by_name").on("input keyup", function() {
-            var search_by_name = jQuery(this).val();
-            jQuery("#explorer_body .explorer_item").each(function() {
-            jQuery(this).hide();
-            if (jQuery(this).find(".item_name").html().trim().toLowerCase().indexOf(search_by_name) !== -1) {
-              jQuery(this).show();
-            }
-            });
-          });
-        });
       </script>
       <script src="<?php echo WD_BWG_URL; ?>/filemanager/js/default.js?ver=<?php echo wd_bwg_version(); ?>"></script>
       <link href="<?php echo WD_BWG_URL; ?>/filemanager/css/default.css?ver=<?php echo wd_bwg_version(); ?>" type="text/css" rel="stylesheet">
@@ -133,7 +122,7 @@ class FilemanagerView {
                 <a class="ctrl_bar_btn btn_remove_items" onclick="onBtnRemoveItemsClick(event, this);" title="<?php echo __('Remove items', 'bwg_back'); ?>"></a>
                 <span class="ctrl_bar_divider"></span>
                 <span class="ctrl_bar_btn">
-                  <a class="ctrl_bar_btn wd-btn wd-btn-primary wd-btn-icon wd-btn-uplaod" id="upload_images" onclick="onBtnShowUploaderClick(event, this);"><?php echo __('Upload files', 'bwg_back'); ?></a>
+                  <a id="upload_images" class="ctrl_bar_btn wd-btn wd-btn-primary wd-btn-icon wd-btn-uplaod" onclick="onBtnShowUploaderClick(event, this);"><?php echo __('Upload files', 'bwg_back'); ?></a>
                 </span>
                 <?php if ($bwg_options->enable_ML_import) { ?>
                 <span class="ctrl_bar_divider"></span>
@@ -167,9 +156,9 @@ class FilemanagerView {
               <div id="explorer_header_wrapper">
                 <div id="explorer_header_container">
                   <div id="explorer_header">
-                    <span class="item_numbering">#</span>
+                    <span class="item_numbering"><?php echo $items_view == 'thumbs' ? __('Order by:', 'bwg') : '#'; ?></span>
                     <span class="item_icon"></span>
-                    <span class="item_name">
+                    <span class="item_name" title="<?php _e('Click to sort by name', 'bwg'); ?>">
                       <span class="clickable" onclick="onNameHeaderClick(event, this);">
                           <?php
                           echo 'Name';
@@ -181,7 +170,7 @@ class FilemanagerView {
                           ?>
                       </span>
                     </span>
-                    <span class="item_size">
+                    <span class="item_size" title="<?php _e('Click to sort by size', 'bwg'); ?>">
                       <span class="clickable" onclick="onSizeHeaderClick(event, this);">
                         <?php
                         echo 'Size';
@@ -193,7 +182,7 @@ class FilemanagerView {
                         ?>
                       </span>
                     </span>
-                    <span class="item_date_modified">
+                    <span class="item_date_modified" title="<?php _e('Click to sort by date modified', 'bwg'); ?>">
                       <span class="clickable" onclick="onDateModifiedHeaderClick(event, this);">
                         <?php
                         echo 'Date modified';
@@ -273,14 +262,14 @@ class FilemanagerView {
             </div>
             <div class="ctrls_bar ctrls_bar_footer">
               <div class="ctrls_left">
-                <a class="ctrl_bar_btn wd-btn wd-btn-primary wd-not-image none_select" id='select_all_images' onclick="onBtnSelectAllClick();"><?php echo __('Select All', 'bwg_back'); ?></a>
+                <a id="select_all_images" class="ctrl_bar_btn wd-btn wd-btn-primary wd-not-image none_select" onclick="onBtnSelectAllClick();"><?php echo __('Select All', 'bwg_back'); ?></a>
               </div>
               <div class="ctrls_right">
                 <span id="file_names_span">
                   <span>
                   </span>
                 </span>
-                <a class="ctrl_bar_btn btn_open wd-btn wd-btn-primary wd-btn-icon-add wd-btn-add none_select" id='add_selectid_img' onclick="onBtnOpenClick(event, this);"><?php echo ((isset($_REQUEST['callback']) && esc_html($_REQUEST['callback']) == 'bwg_add_image') ? __('Add selected images to gallery', 'bwg_back') : __('Add', 'bwg_back')); ?></a>
+                <a id="add_selectid_img" class="ctrl_bar_btn btn_open wd-btn wd-btn-primary wd-btn-icon-add wd-btn-add none_select" onclick="onBtnOpenClick(event, this);"><?php echo ((isset($_REQUEST['callback']) && esc_html($_REQUEST['callback']) == 'bwg_add_image') ? __('Add selected images to gallery', 'bwg_back') : __('Add', 'bwg_back')); ?></a>
                 <span class="ctrl_bar_empty_devider"></span>
                 <a class="ctrl_bar_btn btn_cancel wd-btn wd-btn-primary wd-btn-icon wd-btn-cancel none_select" onclick="onBtnCancelClick(event, this);"><?php echo 'Cancel'; ?></a>
               </div>
