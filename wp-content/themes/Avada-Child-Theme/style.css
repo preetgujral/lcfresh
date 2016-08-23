@@ -1,21 +1,13 @@
 /*
-Theme Name: Avada Child
-Description: Child theme for Avada theme
-Author: ThemeFusion
-Author URI: https://theme-fusion.com
+Theme Name: LLoyd Constantine
 Template: Avada
-Version: 1.0.0
 Text Domain:  Avada
 */
 
-/*
-Center Amazon Affiliate widget content
-*/
-
+/* Center Amazon Affiliate widget content */
 .textwidget {
   text-align: center;
 }
-
 .amzn-ad-container {
   display: inline-block;
 }
